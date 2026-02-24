@@ -23,8 +23,8 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
 // Route khusus Guru
 Route::middleware(['auth', 'role:guru'])->group(function () {
     Route::get('/guru/dashboard', [GuruController::class, 'index'])->name('guru.dashboard');
-    // Tambahkan baris di bawah ini
-    Route::patch('/guru/pengaduan/{id}', [GuruController::class, 'update'])->name('guru.pengaduan.update');
+    // Tambahkan rute update pengaduan ini:
+    Route::put('/guru/pengaduan/{id}', [GuruController::class, 'update'])->name('guru.pengaduan.update');
 });
 
 // Route khusus Murid
