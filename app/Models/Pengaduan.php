@@ -27,4 +27,9 @@ class Pengaduan extends Model
     {
         return $this->belongsTo(Kategori::class);
     }
+    
+    public function ulasans()
+    {
+        return $this->hasMany(Ulasan::class);
+    }
 }

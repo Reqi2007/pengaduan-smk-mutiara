@@ -5,23 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Pengaduan;
 use App\Models\Kategori;
+use App\Models\Ulasan;
 use Illuminate\Support\Facades\Auth;
 
 class MuridController extends Controller
 {
-    /**
-     * Menampilkan halaman Dashboard Murid
-     */
     public function index()
     {
-        // 1. Mengambil riwayat laporan milik murid yang sedang login
         $pengaduans = Pengaduan::where('user_id', Auth::id())->latest()->get();
-        
-        // 2. Mengambil semua kategori untuk pilihan di form laporan
         $kategoris = Kategori::all();
         
-        // 3. Mengambil SEMUA laporan di sekolah yang statusnya sudah 'Selesai' (Untuk Galeri Kinerja)
-        $laporanSelesai = Pengaduan::with(['user', 'kategori'])
+        // Mengambil laporan selesai beserta ulasan dari tabel baru
+        $laporanSelesai = Pengaduan::with(['user', 'kategori', 'ulasans.user'])
                             ->where('status', 'Selesai')
                             ->latest()
                             ->get();
@@ -29,63 +24,59 @@ class MuridController extends Controller
         return view('murid.dashboard', compact('pengaduans', 'kategoris', 'laporanSelesai'));
     }
 
-    /**
-     * Menyimpan laporan pengaduan baru dari murid
-     */
     public function store(Request $request)
     {
-        // Validasi data yang dikirim dari form
         $request->validate([
             'kategori_id' => 'required|exists:kategoris,id',
             'lokasi'      => 'required|string|max:255',
             'keterangan'  => 'required|string',
-            'foto'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Maksimal 2MB
+            'foto'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // Proses upload foto jika murid melampirkan foto
-        $fotoPath = null;
-        if ($request->hasFile('foto')) {
-            // Simpan foto ke folder storage/app/public/pengaduan_fotos
-            $fotoPath = $request->file('foto')->store('pengaduan_fotos', 'public');
-        }
+        $fotoPath = $request->hasFile('foto') ? $request->file('foto')->store('pengaduan_fotos', 'public') : null;
 
-        // Simpan data ke database
         Pengaduan::create([
-            'user_id'     => Auth::id(),
-            'kategori_id' => $request->kategori_id,
-            'lokasi'      => $request->lokasi,
-            'keterangan'  => $request->keterangan,
-            'foto'        => $fotoPath,
-            'status'      => 'Menunggu', // Status awal (default)
+            'user_id' => Auth::id(), 'kategori_id' => $request->kategori_id,
+            'lokasi' => $request->lokasi, 'keterangan' => $request->keterangan,
+            'foto' => $fotoPath, 'status' => 'Menunggu',
         ]);
 
-        // Kembalikan ke halaman sebelumnya dengan pesan sukses
-        return redirect()->back()->with('success', 'Laporan kerusakan berhasil dikirim! Silakan tunggu tindak lanjut dari pihak sekolah.');
+        return redirect()->back()->with('success', 'Laporan berhasil dikirim!');
     }
 
-    /**
-     * Menyimpan rating (Bintang) dan ulasan tingkat kebahagiaan siswa
-     */
-    public function rate(Request $request, $id)
+    // SIMPAN ULASAN BARU
+    public function storeUlasan(Request $request, $pengaduan_id)
     {
-        // Validasi rating dan ulasan
-        $request->validate([
-            'rating'       => 'required|integer|min:1|max:5',
-            'ulasan_murid' => 'nullable|string|max:500'
+        $request->validate(['rating' => 'required|integer|min:1|max:5', 'komentar' => 'required|string']);
+        
+        // Cek jika sudah pernah review
+        if(Ulasan::where('pengaduan_id', $pengaduan_id)->where('user_id', Auth::id())->exists()){
+            return redirect()->back()->with('error', 'Kamu sudah memberikan penilaian.');
+        }
+
+        Ulasan::create([
+            'pengaduan_id' => $pengaduan_id, 'user_id' => Auth::id(),
+            'rating' => $request->rating, 'komentar' => $request->komentar
         ]);
 
-        // Cari laporan berdasarkan ID, dan pastikan laporan tersebut milik murid yang login
-        $pengaduan = Pengaduan::where('id', $id)
-                              ->where('user_id', Auth::id())
-                              ->firstOrFail();
+        return redirect()->back()->with('success', 'Ulasan berhasil dipublikasikan!');
+    }
 
-        // Update data laporan dengan rating dan ulasan baru
-        $pengaduan->update([
-            'rating'       => $request->rating,
-            'ulasan_murid' => $request->ulasan_murid
-        ]);
+    // UPDATE ULASAN
+    public function updateUlasan(Request $request, $id)
+    {
+        $ulasan = Ulasan::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        $request->validate(['rating' => 'required|integer|min:1|max:5', 'komentar' => 'required|string']);
+        
+        $ulasan->update(['rating' => $request->rating, 'komentar' => $request->komentar]);
+        return redirect()->back()->with('success', 'Ulasan berhasil diperbarui!');
+    }
 
-        // Kembalikan ke halaman sebelumnya dengan pesan sukses
-        return redirect()->back()->with('success', 'Terima kasih! Penilaian dan ulasanmu sangat berarti untuk evaluasi kinerja sekolah.');
+    // HAPUS ULASAN
+    public function destroyUlasan($id)
+    {
+        $ulasan = Ulasan::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        $ulasan->delete();
+        return redirect()->back()->with('success', 'Ulasan berhasil dihapus.');
     }
 }

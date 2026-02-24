@@ -28,7 +28,10 @@ Route::middleware(['auth', 'role:guru'])->group(function () {
 Route::middleware(['auth', 'role:murid'])->group(function () {
     Route::get('/murid/dashboard', [MuridController::class, 'index'])->name('murid.dashboard');
     Route::post('/murid/pengaduan', [MuridController::class, 'store'])->name('murid.pengaduan.store');
-    Route::post('/murid/pengaduan/{id}/rate', [MuridController::class, 'rate'])->name('murid.pengaduan.rate');
+    // GANTI baris Route::post('/murid/pengaduan/{id}/rate', ...) yang lama menjadi ini:
+    Route::post('/murid/pengaduan/{id}/ulasan', [MuridController::class, 'storeUlasan'])->name('murid.ulasan.store');
+    Route::put('/murid/ulasan/{id}', [MuridController::class, 'updateUlasan'])->name('murid.ulasan.update');
+    Route::delete('/murid/ulasan/{id}', [MuridController::class, 'destroyUlasan'])->name('murid.ulasan.destroy');
 });
 
 // INI BAGIAN YANG HILANG: Route bawaan Breeze untuk Profile
