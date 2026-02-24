@@ -20,9 +20,15 @@
                 
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-lg font-bold text-gray-700">Daftar Guru & Murid</h3>
-                    <button @click="openModal = true" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
-                        + Tambah Pengguna
-                    </button>
+                    
+                    <div class="flex space-x-2">
+                        <a href="{{ route('superadmin.laporan') }}" target="_blank" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded transition duration-300 shadow-md">
+                            🖨️ Cetak Laporan
+                        </a>
+                        <button @click="openModal = true" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
+                            + Tambah Pengguna
+                        </button>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">

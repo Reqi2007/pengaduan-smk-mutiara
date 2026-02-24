@@ -50,4 +50,14 @@ class SuperAdminController extends Controller
         $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
         return redirect()->back()->with('success', 'Akun '.$user->name.' berhasil '.$status.'!');
     }
+
+    // Lokasi: app/Http/Controllers/SuperAdminController.php
+
+    // Fungsi untuk mencetak laporan pengaduan
+    public function laporan()
+    {
+        // Ambil semua data pengaduan untuk dicetak
+        $pengaduans = \App\Models\Pengaduan::with(['user', 'kategori'])->orderBy('created_at', 'desc')->get();
+        return view('superadmin.laporan', compact('pengaduans'));
+    }
 }

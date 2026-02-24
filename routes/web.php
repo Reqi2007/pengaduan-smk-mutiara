@@ -14,10 +14,9 @@ Route::get('/', function () {
 // Route khusus SuperAdmin
 Route::middleware(['auth', 'role:superadmin'])->group(function () {
     Route::get('/superadmin/dashboard', [SuperAdminController::class, 'index'])->name('superadmin.dashboard');
-    // Rute untuk menambah user baru
     Route::post('/superadmin/users', [SuperAdminController::class, 'storeUser'])->name('superadmin.users.store');
-    // Rute untuk menonaktifkan/mengaktifkan user
     Route::patch('/superadmin/users/{id}/toggle', [SuperAdminController::class, 'toggleStatus'])->name('superadmin.users.toggle');
+    Route::get('/superadmin/laporan', [SuperAdminController::class, 'laporan'])->name('superadmin.laporan');
 });
 
 // Route khusus Guru
