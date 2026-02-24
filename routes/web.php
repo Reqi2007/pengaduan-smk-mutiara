@@ -26,8 +26,11 @@ Route::middleware(['auth', 'role:guru'])->group(function () {
 });
 
 // Route khusus Murid
+// Route khusus Murid
 Route::middleware(['auth', 'role:murid'])->group(function () {
     Route::get('/murid/dashboard', [MuridController::class, 'index'])->name('murid.dashboard');
+    // Tambahkan baris di bawah ini
+    Route::post('/murid/pengaduan', [MuridController::class, 'store'])->name('murid.pengaduan.store');
 });
 
 // Route bawaan Breeze untuk Profile
