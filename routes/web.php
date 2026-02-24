@@ -1,6 +1,5 @@
 <?php
 
-// Lokasi: routes/web.php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuperAdminController;
@@ -22,22 +21,33 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
 // Route khusus Guru
 Route::middleware(['auth', 'role:guru'])->group(function () {
     Route::get('/guru/dashboard', [GuruController::class, 'index'])->name('guru.dashboard');
-    // Tambahkan rute update pengaduan ini:
     Route::put('/guru/pengaduan/{id}', [GuruController::class, 'update'])->name('guru.pengaduan.update');
 });
 
 // Route khusus Murid
 Route::middleware(['auth', 'role:murid'])->group(function () {
     Route::get('/murid/dashboard', [MuridController::class, 'index'])->name('murid.dashboard');
-    // Tambahkan baris di bawah ini
     Route::post('/murid/pengaduan', [MuridController::class, 'store'])->name('murid.pengaduan.store');
 });
 
-// Route bawaan Breeze untuk Profile
+// INI BAGIAN YANG HILANG: Route bawaan Breeze untuk Profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Smart Redirect Dashboard
+Route::get('/dashboard', function () {
+    $role = auth()->user()->role;
+    
+    if ($role === 'superadmin') {
+        return redirect()->route('superadmin.dashboard');
+    } elseif ($role === 'guru') {
+        return redirect()->route('guru.dashboard');
+    } else {
+        return redirect()->route('murid.dashboard');
+    }
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__.'/auth.php';
