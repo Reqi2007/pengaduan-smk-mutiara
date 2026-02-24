@@ -9,22 +9,31 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-    $table->id();
-    $table->string('nis_nip')->unique()->nullable(); // Untuk NIS murid atau NIP guru
-    $table->string('name');
-    $table->string('email')->unique();
-    $table->timestamp('email_verified_at')->nullable();
-    $table->string('password');
-    // Role: superadmin, guru, murid
-    $table->enum('role', ['superadmin', 'guru', 'murid'])->default('murid'); 
-    // Status akun: aktif atau dinonaktifkan
-    $table->boolean('is_active')->default(true); 
-    $table->rememberToken();
-    $table->timestamps();
-});
+            $table->id();
+            $table->string('name')->unique(); // Sekarang Nama harus unik karena dipakai untuk login
+            $table->string('email')->nullable(); // Email kita buat boleh kosong
+            $table->string('password');
+            
+            // Data Akun Multi-Role
+            $table->enum('role', ['superadmin', 'guru', 'murid'])->default('murid'); 
+            $table->boolean('is_active')->default(true); 
+            
+            // Profil Tambahan (Khusus Guru / Murid)
+            $table->string('nis_nip')->unique()->nullable();
+            $table->string('foto_profile')->nullable(); // Foto Profil
+            $table->string('kelas', 20)->nullable(); // Contoh: XII, XI
+            $table->string('jurusan', 50)->nullable(); // Contoh: Rekayasa Perangkat Lunak
+            $table->string('no_telp', 20)->nullable(); // Bonus: Kontak darurat/WA
+            
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
+        // ... (Biarkan tabel password_reset_tokens dan sessions di bawahnya apa adanya)
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
