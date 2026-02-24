@@ -18,6 +18,23 @@
     <div class="py-10 bg-slate-50 min-h-screen" x-data="{ openModal: false, roleMode: 'murid' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+            @if(session('success'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="bg-green-100 border border-green-500 text-green-800 px-6 py-4 rounded-xl shadow-sm flex items-center gap-3">
+                    <span class="text-xl">✅</span> <span class="font-bold">{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-500 text-red-800 px-6 py-4 rounded-xl shadow-sm">
+                    <p class="font-black mb-2 flex items-center gap-2"><span>⚠️</span> Gagal Menambahkan Akun:</p>
+                    <ul class="list-disc pl-8 font-bold text-sm space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h3 class="text-xl font-extrabold text-slate-800">Manajemen Pengguna</h3>
@@ -80,16 +97,23 @@
             </div>
 
             <div x-show="openModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" style="display: none;">
-                <div @click.away="openModal = false" class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
-                    <div class="bg-slate-800 px-6 py-4 text-white font-bold flex justify-between">
-                        Registrasi Pengguna <button @click="openModal = false">&times;</button>
+                <div @click.away="openModal = false" class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden relative max-h-[90vh] overflow-y-auto">
+                    <div class="bg-slate-800 px-6 py-4 text-white font-bold flex justify-between sticky top-0 z-10">
+                        Registrasi Pengguna <button @click="openModal = false" class="hover:text-red-400">&times;</button>
                     </div>
                     <form action="{{ route('superadmin.users.store') }}" method="POST" class="p-6 space-y-4">
                         @csrf
+                        
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap (Username Login)</label>
                             <input type="text" name="name" required class="w-full bg-slate-50 border-slate-200 rounded-xl">
                         </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Email</label>
+                            <input type="email" name="email" required class="w-full bg-slate-50 border-slate-200 rounded-xl" placeholder="contoh@sekolah.com">
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-1">Role Akun</label>
@@ -121,9 +145,10 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">Password Baru</label>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Password Baru (Min. 8 Karakter)</label>
                             <input type="password" name="password" required class="w-full bg-slate-50 border-slate-200 rounded-xl">
                         </div>
+
                         <div class="pt-4 flex justify-end gap-2">
                             <button type="button" @click="openModal = false" class="px-5 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">Batal</button>
                             <button type="submit" class="px-5 py-2 bg-slate-800 text-white rounded-xl font-bold shadow-lg">Simpan Akun</button>
