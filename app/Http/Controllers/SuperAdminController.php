@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\PasswordResetRequest; // WAJIB ditambahkan untuk memanggil tabel permohonan reset
 use Illuminate\Support\Facades\Hash; // WAJIB untuk enkripsi password
 
 class SuperAdminController extends Controller
@@ -14,7 +15,14 @@ class SuperAdminController extends Controller
         // Mengambil semua user selain superadmin, diurutkan dari yang terbaru
         $users = User::where('role', '!=', 'superadmin')->latest()->get();
         
-        return view('superadmin.dashboard', compact('users'));
+        // MENGAMBIL DATA REQUEST RESET PASSWORD YANG MASIH PENDING
+        $resetRequests = PasswordResetRequest::with('user')
+                            ->where('status', 'pending')
+                            ->latest()
+                            ->get();
+        
+        // Melempar variabel $users dan $resetRequests ke halaman view
+        return view('superadmin.dashboard', compact('users', 'resetRequests'));
     }
 
     // 2. Menyimpan User Baru (Agar masuk ke tabel & bisa Login)

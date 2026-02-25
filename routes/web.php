@@ -6,6 +6,18 @@ use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\MuridController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\PasswordResetRequestController;
+
+// Rute Publik (Untuk mengirim permohonan dari halaman login)
+Route::post('/request-reset', [PasswordResetRequestController::class, 'store'])->name('password.admin.request');
+
+// Rute Khusus Superadmin (Pastikan diletakkan di dalam grup middleware auth/superadmin kamu)
+Route::middleware(['auth'])->group(function () {
+    // ... rute superadmin lainnya ...
+    
+    Route::patch('/superadmin/reset-requests/{id}/approve', [PasswordResetRequestController::class, 'approve'])->name('superadmin.reset.approve');
+    Route::delete('/superadmin/reset-requests/{id}', [PasswordResetRequestController::class, 'destroy'])->name('superadmin.reset.reject');
+});
 
 Route::get('/', function () {
     return view('welcome');
