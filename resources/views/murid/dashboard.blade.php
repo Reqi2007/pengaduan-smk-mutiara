@@ -37,37 +37,19 @@
         rateData: { pengaduan_id: '', rating: 0, hover: 0, komentar: '' },
         editRateModal: false,
         editRateData: { id: '', rating: 0, hover: 0, komentar: '' }
-    }" class="relative min-h-screen bg-slate-50 overflow-hidden font-sans selection:bg-blue-200 selection:text-blue-900">
-
+    }" class="relative min-h-screen bg-slate-50 overflow-hidden font-sans selection:bg-blue-200 selection:text-blue-900 pb-20">
+        
         <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-            <div class="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-blue-300/20 rounded-full blur-[100px] animate-float"></div>
-            <div class="absolute bottom-[-10%] right-[-5%] w-[300px] h-[300px] bg-indigo-300/20 rounded-full blur-[100px] animate-float-delayed"></div>
-            <div class="absolute top-[40%] left-[60%] w-[250px] h-[250px] bg-sky-200/20 rounded-full blur-[80px] animate-float"></div>
+            <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-300/20 rounded-full blur-[120px] animate-float"></div>
+            <div class="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-indigo-300/20 rounded-full blur-[100px] animate-float-delayed"></div>
         </div>
 
-        <x-slot name="header">
-            <div class="flex justify-between items-center w-full relative z-10">
-                <h2 class="font-extrabold text-2xl text-slate-800 flex items-center gap-3 tracking-tight">
-                    <span class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/30 text-base transform hover:scale-110 transition duration-300">🎒</span> 
-                    Ruang Aspirasi
-                </h2>
-                <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
-                    @csrf
-                    <button type="submit" class="px-5 py-2.5 bg-white text-red-500 hover:bg-red-500 hover:text-white border border-red-100 hover:border-red-500 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 shadow-sm hover:shadow-md hover:-translate-y-0.5 group">
-                        <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        Keluar
-                    </button>
-                </form>
-            </div>
-        </x-slot>
-
         <div class="py-8 relative z-10">
-            <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-8">
-                
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+
                 @if(session('success'))
                     <div x-show="showSuccess" x-init="setTimeout(() => showSuccess = false, 5000)" 
-                         x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 -translate-y-4 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
-                         class="bg-white border-l-4 border-green-500 px-6 py-4 rounded-2xl shadow-xl shadow-green-500/10 flex items-center gap-4 relative z-50">
+                         x-transition class="bg-white border-l-4 border-green-500 px-6 py-4 rounded-2xl shadow-xl shadow-green-500/10 flex items-center gap-4 relative z-50">
                         <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl shadow-inner">✅</div> 
                         <span class="font-bold text-slate-800">{{ session('success') }}</span>
                     </div>
@@ -80,35 +62,86 @@
                     </div>
                 @endif
 
-                <div class="glass-panel rounded-[2rem] shadow-xl shadow-blue-900/5 p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 md:gap-8 border border-white relative overflow-hidden animate-slide-up">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl -z-10"></div>
+                <div class="glass-panel rounded-[2rem] shadow-xl shadow-blue-900/5 p-8 border border-white relative overflow-hidden animate-slide-up">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-100 to-transparent rounded-bl-full -z-10 opacity-70"></div>
                     
-                    <div class="w-24 h-24 rounded-[1.5rem] rotate-3 hover:rotate-0 border-4 border-white bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-4xl font-black shadow-lg shadow-blue-500/30 transition-all duration-300 flex-shrink-0">
-                        {{ substr(Auth::user()->name, 0, 1) }}
-                    </div>
-                    
-                    <div class="text-center md:text-left flex-1">
-                        <p class="text-blue-600 font-bold text-sm tracking-wider uppercase mb-1">Pelapor Aktif</p>
-                        <h3 class="text-3xl font-black text-slate-900 tracking-tight">{{ Auth::user()->name }}</h3>
-                        <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
-                            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg border border-slate-200">NIS: {{ Auth::user()->nis_nip ?? '-' }}</span>
-                            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-100">🎓 Kelas: {{ Auth::user()->kelas ?? '-' }}</span>
-                            <span class="px-3 py-1 bg-sky-50 text-sky-700 text-xs font-bold rounded-lg border border-sky-100">💻 {{ Auth::user()->jurusan ?? '-' }}</span>
+                    <div class="flex flex-col md:flex-row items-center gap-6">
+                        <div class="relative group shrink-0">
+                            @if(Auth::user()->avatar)
+                                <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Profile" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-xl shadow-blue-500/20">
+                            @else
+                                <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-blue-500/20 border-4 border-white">
+                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                </div>
+                            @endif
+                            <div class="absolute bottom-1 right-1 w-6 h-6 bg-green-500 border-4 border-white rounded-full shadow-sm" title="Online"></div>
+                        </div>
+
+                        <div class="text-center md:text-left flex-1">
+                            <h3 class="text-sm font-bold text-blue-600 uppercase tracking-wider mb-1">Selamat Datang Kembali 👋</h3>
+                            <h1 class="text-3xl font-black text-slate-900 mb-2">{{ Auth::user()->name }}</h1>
+                            <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
+                                <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg border border-slate-200">📧 {{ Auth::user()->email }}</span>
+                                <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-100">NIS: {{ Auth::user()->nis_nip ?? '-' }}</span>
+                                <span class="px-3 py-1 bg-sky-50 text-sky-700 text-xs font-bold rounded-lg border border-sky-100">🎓 Kelas: {{ Auth::user()->kelas ?? '-' }} {{ Auth::user()->jurusan ?? '' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="shrink-0 mt-4 md:mt-0 flex flex-col gap-3 w-full md:w-auto">
+                            <button @click="openModal = true" class="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-extrabold shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Buat Laporan Baru
+                            </button>
+                            <a href="{{ route('profile.edit') }}" class="w-full text-center px-6 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-bold shadow-sm hover:shadow-md transition-all">
+                                ⚙️ Edit Profil
+                            </a>
                         </div>
                     </div>
-                    
-                    <button @click="openModal = true" class="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl font-extrabold shadow-xl shadow-blue-500/30 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-3">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Buat Laporan Baru
-                    </button>
                 </div>
 
-                <div class="flex justify-center md:justify-start animate-slide-up" style="animation-delay: 100ms;">
-                    <div class="flex space-x-2 bg-white/60 backdrop-blur-md p-1.5 rounded-2xl shadow-sm border border-slate-200/60">
-                        <button @click="activeTab = 'kinerja'" :class="activeTab === 'kinerja' ? 'bg-slate-800 text-white shadow-lg shadow-slate-800/20' : 'text-slate-500 hover:bg-white hover:text-slate-800'" class="px-6 py-2.5 rounded-xl font-bold transition-all duration-300 flex items-center gap-2">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="glass-panel rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-900/5 transition-all animate-slide-up hover:-translate-y-1" style="animation-delay: 100ms;">
+                            <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-inner">📚</div>
+                            <h3 class="text-slate-500 font-bold text-sm mb-1">Total Laporanku</h3>
+                            <p class="text-3xl font-black text-slate-800">{{ $pengaduans->count() }} <span class="text-sm font-semibold text-blue-500 ml-1">Laporan</span></p>
+                        </div>
+                        <div class="glass-panel rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-900/5 transition-all animate-slide-up hover:-translate-y-1" style="animation-delay: 200ms;">
+                            <div class="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-inner">✅</div>
+                            <h3 class="text-slate-500 font-bold text-sm mb-1">Laporan Selesai</h3>
+                            <p class="text-3xl font-black text-slate-800">{{ $pengaduans->where('status', 'Selesai')->count() }} <span class="text-sm font-semibold text-slate-400 ml-1">Telah diperbaiki</span></p>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-[2rem] shadow-sm p-6 border border-slate-100 relative overflow-hidden animate-slide-up" style="animation-delay: 300ms;">
+                        <header class="mb-4 flex justify-between items-center border-b border-slate-100 pb-3">
+                            <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">📢 Info Sekolah</h2>
+                        </header>
+                        <div class="space-y-3 h-32 overflow-y-auto custom-scrollbar">
+                            <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50/50 transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 text-xs">👨‍🏫</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">Gunakan Fasilitas dengan Baik</h4>
+                                    <p class="text-xs text-slate-500 font-medium mt-0.5">Mari bersama-sama menjaga kebersihan dan sarpras sekolah kita.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50/50 transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0 text-xs">🎉</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">Fitur Ulasan Aktif</h4>
+                                    <p class="text-xs text-slate-500 font-medium mt-0.5">Sekarang kamu bisa memberikan rating pada laporan yang sudah selesai.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-center md:justify-start animate-slide-up" style="animation-delay: 400ms;">
+                    <div class="flex space-x-2 bg-white/60 backdrop-blur-md p-1.5 rounded-2xl shadow-sm border border-slate-200/60 w-full md:w-auto overflow-x-auto">
+                        <button @click="activeTab = 'kinerja'" :class="activeTab === 'kinerja' ? 'bg-slate-800 text-white shadow-lg shadow-slate-800/20' : 'text-slate-500 hover:bg-white hover:text-slate-800'" class="px-6 py-2.5 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 whitespace-nowrap">
                             📂 Feed Kinerja
                         </button>
-                        <button @click="activeTab = 'laporanku'" :class="activeTab === 'laporanku' ? 'bg-slate-800 text-white shadow-lg shadow-slate-800/20' : 'text-slate-500 hover:bg-white hover:text-slate-800'" class="px-6 py-2.5 rounded-xl font-bold transition-all duration-300 flex items-center gap-2">
+                        <button @click="activeTab = 'laporanku'" :class="activeTab === 'laporanku' ? 'bg-slate-800 text-white shadow-lg shadow-slate-800/20' : 'text-slate-500 hover:bg-white hover:text-slate-800'" class="px-6 py-2.5 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 whitespace-nowrap">
                             🕒 Riwayat Pribadi
                         </button>
                     </div>
@@ -116,7 +149,7 @@
 
                 <div x-show="activeTab === 'kinerja'" 
                      x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
-                     class="space-y-4 max-w-4xl mx-auto">
+                     class="space-y-4 max-w-5xl mx-auto">
                     
                     @forelse($laporanSelesai as $post)
                         @php
@@ -128,15 +161,12 @@
                             
                             <button @click="expanded = !expanded" class="w-full text-left p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/60 hover:bg-slate-50/80 transition-colors focus:outline-none">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 transition-transform duration-500 shadow-sm border border-slate-100 bg-white" :class="expanded ? 'rotate-[-15deg] scale-110' : ''">
-                                        🗂️
-                                    </div>
+                                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 transition-transform duration-500 shadow-sm border border-slate-100 bg-white" :class="expanded ? 'rotate-[-15deg] scale-110' : ''">🗂️</div>
                                     <div>
                                         <h4 class="text-lg font-extrabold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{{ $post->lokasi }}</h4>
                                         <p class="text-sm font-semibold text-slate-500 mt-0.5 flex items-center gap-2">
                                             <span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider border border-indigo-100">{{ $post->kategori->nama_kategori ?? 'Umum' }}</span>
-                                            <span>•</span>
-                                            Oleh: {{ $post->user->name }}
+                                            <span>•</span> Oleh: {{ $post->user->name }}
                                         </p>
                                     </div>
                                 </div>
@@ -159,7 +189,6 @@
                             </button>
 
                             <div x-show="expanded" x-collapse x-transition class="border-t border-slate-200 bg-slate-50/50">
-                                
                                 <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 bg-white/60">
                                     <div class="space-y-3">
                                         <h5 class="text-[11px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
@@ -182,19 +211,19 @@
                                         </h5>
                                         <div class="bg-green-50 p-5 rounded-2xl border border-green-200 flex-1 flex flex-col relative overflow-hidden shadow-sm">
                                             <div class="absolute -bottom-4 -right-4 text-7xl opacity-10">🛠️</div>
-                                            <h6 class="font-extrabold text-green-800 mb-2 text-sm flex items-center gap-2">👨‍🏫 Respon dari Guru / Petugas:</h6>
+                                            <h6 class="font-extrabold text-green-800 mb-2 text-sm flex items-center gap-2">👨‍🏫 Respon Guru/Petugas:</h6>
                                             <p class="text-sm text-green-700 leading-relaxed font-medium flex-1">
-                                                {{ optional($post->tanggapan)->tanggapan ?? 'Laporan ini telah direspon dan sarpras terkait sudah selesai diperbaiki oleh tim teknisi sekolah. Terima kasih atas partisipasi aktifmu dalam menjaga fasilitas sekolah!' }}
+                                                {{ optional($post->tanggapan)->tanggapan ?? 'Laporan ini telah direspon dan sarpras terkait sudah selesai diperbaiki oleh tim sekolah.' }}
                                             </p>
                                             <p class="text-[11px] text-green-600 font-black mt-4 flex items-center gap-1 bg-green-100 w-max px-2 py-1 rounded-md">
-                                                ✅ Diselesaikan pada: {{ $post->updated_at->format('d M Y') }}
+                                                ✅ Selesai: {{ $post->updated_at->format('d M Y') }}
                                             </p>
                                         </div>
                                         
                                         @php $myReview = $post->ulasans->where('user_id', Auth::id())->first(); @endphp
                                         @if(!$myReview)
                                             <button @click="rateModal = true; rateData.pengaduan_id = '{{ $post->id }}'; rateData.rating = 0; rateData.komentar = ''" class="w-full py-4 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white rounded-2xl font-extrabold shadow-lg shadow-amber-500/30 transition-all transform hover:-translate-y-1 flex justify-center items-center gap-2">
-                                                <span class="text-2xl drop-shadow-md">⭐</span> Beri Nilai Hasil Perbaikan Ini
+                                                <span class="text-2xl drop-shadow-md">⭐</span> Beri Nilai Perbaikan Ini
                                             </button>
                                         @else
                                             <div class="w-full py-3 bg-slate-100 text-slate-500 rounded-2xl font-bold border border-slate-200 flex justify-center items-center gap-2">
@@ -218,9 +247,7 @@
                                                 <div class="flex-1">
                                                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-0">
                                                         <div>
-                                                            <p class="text-sm font-extrabold text-slate-900">{{ $ulasan->user->name }} 
-                                                                <span class="text-[11px] font-semibold text-slate-400 ml-2">{{ $ulasan->created_at->diffForHumans() }}</span>
-                                                            </p>
+                                                            <p class="text-sm font-extrabold text-slate-900">{{ $ulasan->user->name }} <span class="text-[11px] font-semibold text-slate-400 ml-2">{{ $ulasan->created_at->diffForHumans() }}</span></p>
                                                             <div class="flex text-amber-400 text-sm mt-0.5 mb-2 tracking-widest drop-shadow-sm">
                                                                 @for($i=0; $i<$ulasan->rating; $i++) ★ @endfor
                                                                 @for($i=$ulasan->rating; $i<5; $i++) <span class="text-slate-200">★</span> @endfor
@@ -244,12 +271,10 @@
                                             <div class="text-center py-8 bg-white/50 border-2 border-dashed border-slate-200 rounded-2xl">
                                                 <span class="text-4xl block mb-2 opacity-60">✍️</span>
                                                 <p class="text-sm text-slate-500 font-bold">Belum ada siswa yang memberikan ulasan.</p>
-                                                <p class="text-xs text-slate-400 mt-1">Jadilah yang pertama menilai kinerja ini!</p>
                                             </div>
                                         @endforelse
                                     </div>
                                 </div>
-                                
                             </div>
                         </div>
                     @empty
@@ -263,7 +288,7 @@
 
                 <div x-show="activeTab === 'laporanku'" 
                      x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" 
-                     style="display: none;">
+                     style="display: none;" class="max-w-5xl mx-auto">
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         @forelse($pengaduans as $item)
@@ -356,7 +381,6 @@
                             <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Bukti Foto (Opsional)</label>
                             <input type="file" name="foto" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors border border-slate-200 rounded-xl bg-slate-50 cursor-pointer">
                         </div>
-                        
                         <div class="pt-2">
                             <button type="submit" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-extrabold shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
