@@ -25,6 +25,13 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            // Aturan validasi tambahan untuk foto profil
+            'avatar' => [
+                'nullable', // Boleh kosong (tidak wajib diisi)
+                'image',    // Harus berupa file gambar
+                'mimes:jpeg,png,jpg,gif', // Ekstensi yang diizinkan
+                'max:2048', // Ukuran maksimal 2048 KB (2 MB)
+            ],
         ];
     }
 }
