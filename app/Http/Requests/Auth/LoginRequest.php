@@ -24,29 +24,45 @@ class LoginRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    // Lokasi: app/Http/Requests/Auth/LoginRequest.php
-
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'], // Ubah 'email' menjadi 'name'
+            'name' => ['required', 'string'], // Validasi menggunakan 'name' (Username)
             'password' => ['required', 'string'],
         ];
     }
 
+    /**
+     * Attempt to authenticate the request's credentials.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
 
-        // Ubah 'email' menjadi 'name' di dalam Auth::attempt
+        // 1. Cek apakah kombinasi Name dan Password benar
         if (! Auth::attempt($this->only('name', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'name' => trans('auth.failed'), // Ubah ini juga
+                'name' => trans('auth.failed'),
             ]);
         }
 
+        // 2. CEK STATUS AKTIF: Jika password benar tapi akun dinonaktifkan
+        if (! Auth::user()->is_active) {
+            
+            // Paksa akun tersebut logout kembali secara instan
+            Auth::logout(); 
+
+            // Munculkan pesan error di halaman login
+            throw ValidationException::withMessages([
+                'name' => 'Akun Anda telah dinonaktifkan. Silakan hubungi Admin Sekolah.',
+            ]);
+        }
+
+        // 3. Jika aman, bersihkan catatan rate limiter
         RateLimiter::clear($this->throttleKey());
     }
 
@@ -65,8 +81,9 @@ class LoginRequest extends FormRequest
 
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
+        // [BUG FIX]: Variabel diubah dari 'email' menjadi 'name'
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'name' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -78,6 +95,7 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        // [BUG FIX]: Pembacaan string diubah dari 'email' menjadi 'name'
+        return Str::transliterate(Str::lower($this->string('name')).'|'.$this->ip());
     }
 }
