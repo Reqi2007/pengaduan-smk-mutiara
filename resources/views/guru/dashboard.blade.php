@@ -289,13 +289,13 @@
                                 </div>
                             </a>
                             
-                            <div x-show="!studentProfile.hp || studentProfile.hp === 'Tidak ada'" class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 opacity-60 mt-2">
+                            <!-- <div x-show="!studentProfile.hp || studentProfile.hp === 'Tidak ada'" class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 opacity-60 mt-2">
                                 <div class="w-12 h-12 rounded-xl bg-slate-200 flex items-center justify-center text-slate-400 text-xl shrink-0">📞</div>
                                 <div>
                                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Kontak</p>
                                     <p class="text-sm font-bold text-slate-500 mt-0.5">Nomor tidak tersedia</p>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>

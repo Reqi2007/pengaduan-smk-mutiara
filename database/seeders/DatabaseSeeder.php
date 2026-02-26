@@ -29,7 +29,6 @@ class DatabaseSeeder extends Seeder
             'password' => $defaultPassword,
             'role' => 'guru',
             'is_active' => true,
-            'no_telp' => '081234567890'
         ]);
 
         User::create([
@@ -49,7 +48,6 @@ class DatabaseSeeder extends Seeder
             'password' => $defaultPassword,
             'role' => 'murid',
             'is_active' => true,
-            'no_telp' => '085711223344'
         ]);
 
         User::create([

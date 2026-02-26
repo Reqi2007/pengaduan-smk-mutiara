@@ -90,8 +90,7 @@
 <body>
 
     <div class="no-print">
-        <button onclick="window.print()" class="btn-print">🖨️ Cetak / Simpan PDF</button>
-        <a href="javascript:history.back()" style="margin-left: 10px; color: #2563eb; text-decoration: none;">&larr; Kembali</a>
+        <!-- <button onclick="window.print()" class="btn-print">🖨️ Cetak / Simpan PDF</button> -->
     </div>
 
     <table class="kop-surat">
