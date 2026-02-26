@@ -40,17 +40,30 @@
         .teto-bang-side.left { left: 4px; border-radius: 8px 0 0 12px; transform: rotate(15deg); }
         .teto-bang-side.right { right: 4px; border-radius: 0 8px 12px 0; transform: rotate(-15deg); }
 
-        /* Twin Drills (Rambut Bor Kiri & Kanan - Simetris) */
+/* Twin Drills (Rambut Bor Kiri & Kanan - Diperbesar & Dinaikkan) */
         .teto-drill {
-            position: absolute; width: 14px; height: 28px;
-            background: repeating-linear-gradient(-25deg, #D13A54, #D13A54 5px, #A92640 5px, #A92640 7px);
+            position: absolute; 
+            width: 18px;  /* Diperbesar dari 14px */
+            height: 34px; /* Diperpanjang dari 28px */
+            background: repeating-linear-gradient(-25deg, #D13A54, #D13A54 6px, #A92640 6px, #A92640 9px); /* Jarak striping disesuaikan dengan ukuran baru */
             border-radius: 50% 50% 50% 50% / 15% 15% 85% 85%;
-            top: 22px; z-index: 2;
+            top: 18px; /* Dinaikkan ke atas (sebelumnya 22px) */
+            z-index: 2;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             transition: transform 0.3s;
         }
-        .teto-drill.left { left: 1px; transform: rotate(10deg); transform-origin: top center; }
-        .teto-drill.right { right: 1px; transform: rotate(-10deg) scaleX(-1); transform-origin: top center; }
+        
+        /* Penyesuaian jarak kiri/kanan agar proporsional dengan wajah */
+        .teto-drill.left { 
+            left: -4px; /* Digeser keluar agar tidak terlalu menempel ke pipi */
+            transform: rotate(10deg); 
+            transform-origin: top center; 
+        }
+        .teto-drill.right { 
+            right: -4px; /* Digeser keluar agar seimbang */
+            transform: rotate(-10deg) scaleX(-1); 
+            transform-origin: top center; 
+        }
 
         /* Wajah & Pipi (Sedikit Diperbesar & Presisi Tengah) */
         .teto-face {
@@ -140,7 +153,7 @@
                         </div>
 
                         <div class="hidden sm:flex flex-col">
-                            <span class="font-black text-xl tracking-tight text-slate-800 group-hover:text-blue-600 transition-colors leading-none">RuangAspirasi</span>
+                            <span class="font-black text-xl tracking-tight text-slate-800 group-hover:text-blue-600 transition-colors leading-none">Ruang Aspirasi</span>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Sistem Pelaporan</span>
                         </div>
                     </a>
