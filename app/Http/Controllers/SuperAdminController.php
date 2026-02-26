@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\PasswordResetRequest;
-use App\Models\Pengaduan; // WAJIB DITAMBAHKAN untuk memanggil data laporan
+use App\Models\Pengaduan; 
 use Illuminate\Support\Facades\Hash;
 
 class SuperAdminController extends Controller
@@ -60,14 +60,12 @@ class SuperAdminController extends Controller
         return redirect()->back()->with('success', 'Status akun ' . $user->name . ' berhasil diperbarui.');
     }
 
-    // 4. (DIPERBAIKI) Cetak Laporan PDF
     // 4. Cetak Laporan PDF
     public function laporan()
     {
         // Mengambil semua data laporan/pengaduan beserta data user dan kategorinya
         $pengaduans = Pengaduan::with(['user', 'kategori'])->latest()->get();
 
-        // UBAH BAGIAN INI: Tambahkan 'superadmin.' di depannya
         return view('superadmin.laporan', compact('pengaduans'));
     }
 }
