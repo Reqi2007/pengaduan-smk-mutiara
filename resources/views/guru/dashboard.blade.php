@@ -189,7 +189,7 @@
         </div>
 
         <div x-cloak x-show="openModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            <div @click.away="openModal = false" x-show="openModal" x-transition.opacity class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+            <div @click="openModal = false" x-show="openModal" x-transition.opacity class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
             
             <div x-show="openModal" 
                  x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-8 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -233,7 +233,7 @@
         </div>
 
         <div x-cloak x-show="profileModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            <div @click.away="profileModal = false" x-show="profileModal" x-transition.opacity class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+            <div @click="profileModal = false" x-show="profileModal" x-transition.opacity class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
             
             <div x-show="profileModal" 
                  x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-8 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -243,55 +243,57 @@
                     <button @click="profileModal = false" class="absolute top-4 right-4 text-white/80 hover:text-white bg-black/20 hover:bg-black/40 w-8 h-8 rounded-full flex items-center justify-center font-bold transition backdrop-blur-sm">&times;</button>
                 </div>
                 
-                <div class="px-8 pb-8 relative">
-                    <div class="w-24 h-24 bg-white rounded-[1.5rem] rotate-3 border-4 border-white shadow-xl absolute -top-12 left-8 flex items-center justify-center text-4xl font-black overflow-hidden z-20">
+                <div class="px-8 pb-8 relative text-center">
+                    
+                    <div class="w-28 h-28 bg-white rounded-[1.5rem] border-4 border-white shadow-xl absolute -top-16 left-1/2 transform -translate-x-1/2 flex items-center justify-center text-4xl font-black overflow-hidden z-20">
                         <template x-if="studentProfile.avatar">
-                            <img :src="studentProfile.avatar" class="w-full h-full object-cover -rotate-3">
+                            <img :src="studentProfile.avatar" class="w-full h-full object-cover">
                         </template>
                         <template x-if="!studentProfile.avatar">
-                            <div class="w-full h-full bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white -rotate-3">
+                            <div class="w-full h-full bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white">
                                 <span x-text="studentProfile.name.charAt(0)"></span>
                             </div>
                         </template>
                     </div>
                     
-                    <div class="mt-16">
-                        <p class="text-xs font-black text-indigo-600 uppercase tracking-widest mb-1">Identitas Pelapor</p>
+                    <div class="pt-16">
+                        <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Identitas Pelapor</p>
                         <h3 class="text-2xl font-black text-slate-900 tracking-tight leading-tight" x-text="studentProfile.name"></h3>
                         <p class="text-sm font-bold text-slate-500 mt-1" x-text="'NIS: ' + studentProfile.nis"></p>
                         
-                        <div class="space-y-3 mt-6">
-                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 text-lg shrink-0">🎓</div>
+                        <div class="space-y-3 mt-6 text-left">
+                            <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 text-xl shrink-0">🎓</div>
                                 <div>
                                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Tingkat Kelas</p>
-                                    <p class="text-sm font-bold text-slate-800" x-text="studentProfile.kelas"></p>
+                                    <p class="text-sm font-bold text-slate-800 mt-0.5" x-text="studentProfile.kelas"></p>
                                 </div>
                             </div>
                             
-                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 text-lg shrink-0">💻</div>
+                            <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 text-xl shrink-0">💻</div>
                                 <div>
                                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Program / Jurusan</p>
-                                    <p class="text-sm font-bold text-slate-800" x-text="studentProfile.jurusan"></p>
+                                    <p class="text-sm font-bold text-slate-800 mt-0.5" x-text="studentProfile.jurusan"></p>
                                 </div>
                             </div>
                             
                             <a x-show="studentProfile.hp && studentProfile.hp !== 'Tidak ada'" 
                                :href="'https://wa.me/' + studentProfile.hp.replace(/[^0-9]/g, '')" 
                                target="_blank" 
-                               class="flex items-center gap-3 p-3 bg-green-50 hover:bg-green-100 rounded-xl border border-green-200 transition group cursor-pointer mt-2">
-                                <div class="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center text-white text-lg shrink-0 group-hover:scale-110 transition-transform">📞</div>
+                               class="flex items-center gap-4 p-4 bg-green-50 hover:bg-green-100 rounded-2xl border border-green-200 transition group cursor-pointer mt-2">
+                                <div class="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center text-white text-xl shrink-0 group-hover:scale-110 transition-transform">📞</div>
                                 <div>
                                     <p class="text-[10px] font-black text-green-600/70 uppercase tracking-wider">Hubungi via WhatsApp</p>
-                                    <p class="text-sm font-bold text-green-700" x-text="studentProfile.hp"></p>
+                                    <p class="text-sm font-bold text-green-700 mt-0.5" x-text="studentProfile.hp"></p>
                                 </div>
                             </a>
-                            <div x-show="!studentProfile.hp || studentProfile.hp === 'Tidak ada'" class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 opacity-60">
-                                <div class="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-400 text-lg shrink-0">📞</div>
+                            
+                            <div x-show="!studentProfile.hp || studentProfile.hp === 'Tidak ada'" class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 opacity-60 mt-2">
+                                <div class="w-12 h-12 rounded-xl bg-slate-200 flex items-center justify-center text-slate-400 text-xl shrink-0">📞</div>
                                 <div>
                                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Kontak</p>
-                                    <p class="text-sm font-bold text-slate-500">Nomor tidak tersedia</p>
+                                    <p class="text-sm font-bold text-slate-500 mt-0.5">Nomor tidak tersedia</p>
                                 </div>
                             </div>
                         </div>
