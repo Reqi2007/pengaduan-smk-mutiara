@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         $defaultPassword = Hash::make('password123'); // Semua passwordnya: password123
 
-        // 1. Akun SuperAdmin (Refan)
+        // 1. Akun SuperAdmin
         User::create([
             'name' => 'Refan Al-Kholqi',
             'password' => $defaultPassword,
