@@ -30,24 +30,63 @@
             border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
-        /* Modal Animations */
-        #reset-modal {
-            transition: opacity 0.3s ease-in-out, visibility 0.3s;
+        /* Modal Reset Password */
+        #reset-modal { transition: opacity 0.3s ease-in-out, visibility 0.3s; }
+        #reset-modal .modal-content { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .modal-hidden .modal-content { transform: translateY(20px) scale(0.95); }
+
+        /* =========================================
+           WIDGET GIF LOADING (POSISI TENGAH)
+           ========================================= */
+        .gif-character {
+            position: relative; 
+            width: 160px; /* Sesuaikan ukuran GIF kamu di sini */
+            height: 160px;
+            transform-origin: bottom center;
+            animation: body-float 3s infinite alternate ease-in-out;
+            z-index: 50;
         }
-        #reset-modal .modal-content {
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+        .gif-character img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 15px rgb(0 0 0 / 0.15)); /* Bayangan agar GIF menyatu */
         }
-        .modal-hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
+
+        @keyframes body-float { 
+            0% { transform: translateY(0); } 
+            100% { transform: translateY(-10px); } 
         }
-        .modal-hidden .modal-content {
-            transform: translateY(20px) scale(0.95);
+
+        /* Balon Teks & Kursor */
+        @keyframes blink { 50% { border-color: transparent; } }
+        .typing-cursor { border-right: 3px solid #db2777; animation: blink 0.5s step-end infinite alternate; }
+        
+        /* Titik tumpu balon teks diubah ke TENGAH BAWAH */
+        #teto-bubble { transform-origin: bottom center; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 60; }
+        .bubble-hidden { opacity: 0; transform: scale(0.5) translateY(20px); }
+        .bubble-visible { opacity: 1; transform: scale(1) translateY(0); }
+        
+        @media (max-width: 768px) {
+            .gif-character { width: 130px; height: 130px; }
         }
     </style>
 </head>
 <body class="antialiased font-sans text-slate-800 bg-pattern min-h-screen flex items-center justify-center relative overflow-hidden selection:bg-blue-200 selection:text-blue-900 page-enter">
+
+    <div id="teto-container" class="fixed inset-0 z-[100] flex flex-col items-center justify-center pointer-events-none opacity-0 translate-y-20 transition-all duration-700 ease-out">
+        
+        <div id="teto-bubble" class="bg-white border-4 border-pink-400 rounded-[2rem] shadow-2xl p-5 md:p-6 max-w-[280px] md:max-w-md mb-6 bubble-hidden relative text-center">
+            <div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-white border-b-4 border-r-4 border-pink-400 rotate-45"></div>
+            <p id="teto-text" class="text-sm md:text-lg font-extrabold text-slate-700 leading-relaxed min-h-[60px]"></p>
+        </div>
+        
+        <div class="gif-character" id="teto-character">
+            <img src="{{ asset('images/loading.gif') }}" alt="Loading animation">
+        </div>
+    </div>
 
     <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden flex justify-center items-center">
         <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-400/20 rounded-full blur-[100px] animate-float"></div>
@@ -59,11 +98,11 @@
         Kembali
     </a>
 
-    <div class="relative z-10 w-full max-w-md px-6">
+    <div class="relative z-10 w-full max-w-md px-6" id="login-box">
         <div class="flex justify-center mb-6">
             <div class="relative group">
                 <div class="absolute inset-0 bg-blue-500 blur-xl opacity-30 rounded-full group-hover:opacity-50 transition duration-500"></div>
-                <img src="{{ asset('images/logo.png') }}" alt="Logo SMK Mutiara" class="w-24 h-24 object-contain relative z-10 transform group-hover:scale-105 transition duration-500">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-24 h-24 object-contain relative z-10 transform group-hover:scale-105 transition duration-500">
             </div>
         </div>
 
@@ -107,45 +146,39 @@
                         <input id="remember_me" type="checkbox" name="remember" class="rounded border-slate-300 text-blue-600 shadow-sm focus:ring-blue-500 group-hover:border-blue-400 transition-colors w-4 h-4">
                         <span class="ms-2 text-sm font-semibold text-slate-600 group-hover:text-slate-800 transition-colors">Ingat Saya</span>
                     </label>
-
                     <button type="button" onclick="toggleModal(true)" class="text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors focus:outline-none">
                         Lupa sandi?
                     </button>
                 </div>
 
-                <button type="submit" class="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-blue-500/30 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition hover:-translate-y-0.5">
-                    Masuk Sekarang
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                <button type="submit" id="btn-submit" class="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-blue-500/30 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition hover:-translate-y-0.5">
+                    <span>Masuk Sekarang</span>
+                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
                 </button>
             </form>
         </div>
-        <p class="text-center text-slate-500 text-xs font-semibold mt-8 animate-pulse">Sistem Pengaduan Sarpras © 2026</p>
+        <p class="text-center text-slate-500 text-xs font-semibold mt-8 animate-pulse">Sistem Pengaduan Sarpras © 2026 by Refan</p>
     </div>
 
     <div id="reset-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm modal-hidden">
         <div class="absolute inset-0 cursor-pointer" onclick="toggleModal(false)"></div>
-        
         <div class="modal-content relative w-full max-w-sm bg-white p-6 md:p-8 rounded-[2rem] shadow-2xl mx-4 border border-slate-100">
             <button onclick="toggleModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition bg-slate-50 hover:bg-red-50 p-2 rounded-full">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-
             <div class="w-12 h-12 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mb-4 shadow-inner">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             </div>
-            
             <h3 class="text-xl font-extrabold text-slate-900 mb-2">Permohonan Reset Sandi</h3>
             <p class="text-sm text-slate-500 mb-6 leading-relaxed">
                 Demi keamanan, pengaturan ulang sandi memerlukan persetujuan <span class="font-bold text-slate-700">Superadmin</span>. Masukkan Username/Email Anda untuk mengajukan permohonan.
             </p>
-
-            <form method="POST" action="{{ route('password.admin.request') }}" id="request-reset-form">
+            <form method="POST" action="{{ route('password.admin.request') }}">
                 @csrf
                 <div class="mb-5">
                     <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">Username / Email Akun</label>
                     <input type="text" name="account_identifier" required placeholder="Cth: andi123 / andi@siswa.com" class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors">
                 </div>
-                
                 <button type="submit" class="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl font-bold text-white bg-amber-500 hover:bg-amber-600 focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all shadow-lg shadow-amber-500/30 hover:-translate-y-0.5">
                     Kirim Permohonan
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
@@ -153,30 +186,69 @@
             </form>
         </div>
     </div>
+
     <script>
-        // Logika Transisi Halus Halaman
         document.addEventListener('DOMContentLoaded', () => {
             requestAnimationFrame(() => requestAnimationFrame(() => {
                 document.body.classList.add('page-enter-active');
             }));
 
-            const pageLinks = document.querySelectorAll('.page-link');
-            pageLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault(); 
-                    document.body.classList.remove('page-enter-active');
-                    document.body.classList.add('page-exit-active');
-                    setTimeout(() => { window.location.href = this.href; }, 400); 
-                });
-            });
+            // ====== LOGIKA ANIMASI POP-UP & TYPING ======
+            const loginForm = document.getElementById('login-form');
+            const btnSubmit = document.getElementById('btn-submit');
+            
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault(); 
 
-            document.getElementById('login-form').addEventListener('submit', () => {
-                document.body.classList.remove('page-enter-active');
-                document.body.classList.add('page-exit-active');
+                const nameInput = document.getElementById('name').value.trim() || 'Pengguna';
+                const tetoContainer = document.getElementById('teto-container');
+                const tetoBubble = document.getElementById('teto-bubble');
+                const tetoText = document.getElementById('teto-text');
+                
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sedang masuk...`;
+                
+                // Meredupkan form login
+                document.getElementById('login-box').style.opacity = "0.05";
+                document.getElementById('login-box').style.filter = "blur(4px)";
+                document.getElementById('login-box').style.transition = "all 0.8s";
+
+                // Memunculkan GIF ke TENGAH layar
+                tetoContainer.classList.remove('opacity-0', 'translate-y-20');
+                tetoContainer.classList.add('opacity-100', 'translate-y-0');
+                
+                setTimeout(() => {
+                    tetoBubble.classList.remove('bubble-hidden');
+                    tetoBubble.classList.add('bubble-visible');
+                    
+                    const fullText = `Hallo selamat datang ${nameInput} di Aspirasi Fasilitas Sekolah, web ini dibuat oleh Refan!`;
+                    let i = 0;
+                    tetoText.innerHTML = '';
+                    tetoText.classList.add('typing-cursor');
+
+                    const typeInterval = setInterval(() => {
+                        tetoText.innerHTML += fullText.charAt(i);
+                        i++;
+                        
+                        if (i >= fullText.length) {
+                            clearInterval(typeInterval);
+                            tetoText.classList.remove('typing-cursor'); 
+
+                            setTimeout(() => {
+                                document.body.classList.remove('page-enter-active');
+                                document.body.classList.add('page-exit-active');
+                                
+                                setTimeout(() => {
+                                    HTMLFormElement.prototype.submit.call(loginForm);
+                                }, 400);
+                            }, 2000); 
+                        }
+                    }, 40);
+
+                }, 600);
             });
         });
 
-        // Logika Buka/Tutup Modal Lupa Password
         function toggleModal(show) {
             const modal = document.getElementById('reset-modal');
             if (show) {
