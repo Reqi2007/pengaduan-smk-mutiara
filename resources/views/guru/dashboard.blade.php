@@ -103,7 +103,7 @@
                                     <th class="px-6 py-5 whitespace-nowrap">Data Pelapor</th>
                                     <th class="px-6 py-5">Masalah & Lokasi</th>
                                     <th class="px-6 py-5 text-center whitespace-nowrap">Bukti Foto</th>
-                                    <th class="px-6 py-5 text-center">Status</th>
+                                    <th class="px-6 py-5 text-center">Status & Penilaian</th>
                                     <th class="px-6 py-5 text-center">Tindakan</th>
                                 </tr>
                             </thead>
@@ -151,20 +151,39 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-5 text-center align-middle">
-                                        @if($item->status == 'Menunggu') 
-                                            <span class="bg-amber-100 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex items-center justify-center gap-1 w-max mx-auto"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Menunggu</span>
-                                        @elseif($item->status == 'Proses') 
-                                            <span class="bg-blue-100 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex items-center justify-center gap-1 w-max mx-auto"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Proses</span>
-                                        @else 
-                                            <span class="bg-green-100 border border-green-200 text-green-700 px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex items-center justify-center gap-1 w-max mx-auto"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Selesai</span> 
-                                        @endif
-                                        
-                                        @if($item->status == 'Selesai' && $item->rating)
-                                            <div class="text-amber-400 text-sm mt-2 flex justify-center drop-shadow-sm" title="Siswa memberi {{ $item->rating }} Bintang">
-                                                @for($i=0; $i<$item->rating; $i++) ★ @endfor
-                                            </div>
-                                        @endif
-                                    </td>
+    {{-- 1. TAMPILAN BADGE STATUS --}}
+    @if($item->status == 'Menunggu') 
+        <span class="bg-amber-100 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex items-center justify-center gap-1 w-max mx-auto"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Menunggu</span>
+    @elseif($item->status == 'Proses') 
+        <span class="bg-blue-100 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex items-center justify-center gap-1 w-max mx-auto"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Proses</span>
+    @else 
+        <span class="bg-green-100 border border-green-200 text-green-700 px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex items-center justify-center gap-1 w-max mx-auto"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Selesai</span> 
+    @endif
+    
+    {{-- 2. TAMPILAN RATING & ULASAN SISWA --}}
+    @if($item->status == 'Selesai')
+        <div class="mt-3 p-3 bg-white/80 border border-slate-200 rounded-xl shadow-sm max-w-[180px] mx-auto">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider mb-1">Penilaian Siswa</p>
+            
+            {{-- Jika ada rating, tampilkan bintang. (Ubah kata 'rating' di bawah jika nama kolom databasemu berbeda) --}}
+            @if(!empty($item->rating))
+                <div class="text-amber-400 text-sm flex justify-center drop-shadow-sm mb-1.5">
+                    @for($i=0; $i<$item->rating; $i++) ★ @endfor
+                </div>
+                
+                {{-- Tampilkan teks ulasan. (Ubah kata 'ulasan' jika nama kolom databasemu berbeda) --}}
+                <div class="text-[11px] text-slate-700 font-medium italic border-t border-slate-100 pt-1.5 mt-1.5 leading-relaxed">
+                    "{{ $item->ulasan ?? 'Siswa hanya memberi bintang tanpa ulasan' }}"
+                </div>
+            @else
+                {{-- Jika status sudah selesai tapi siswa belum memberi nilai --}}
+                <div class="text-[10px] text-slate-400 italic mt-1 bg-slate-50 p-1.5 rounded border border-slate-100">
+                    ⏳ Menunggu siswa memberi penilaian...
+                </div>
+            @endif
+        </div>
+    @endif
+</td>
                                     <td class="px-6 py-5 text-center align-middle">
                                         <button @click="openModal = true; selectedData = { id: '{{ $item->id }}', status: '{{ $item->status }}', feedback: '{{ addslashes($item->feedback) }}' }" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-lg shadow-indigo-500/30 transition transform hover:-translate-y-0.5 whitespace-nowrap flex items-center justify-center gap-1.5 mx-auto">
                                             ✏️ Tanggapi
@@ -188,6 +207,7 @@
             </div>
         </div>
 
+        {{-- Modal Ubah Status --}}
         <div x-cloak x-show="openModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <div @click="openModal = false" x-show="openModal" x-transition.opacity class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
             
@@ -232,6 +252,7 @@
             </div>
         </div>
 
+        {{-- Modal Profil Siswa --}}
         <div x-cloak x-show="profileModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <div @click="profileModal = false" x-show="profileModal" x-transition.opacity class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
             
@@ -288,14 +309,6 @@
                                     <p class="text-sm font-bold text-green-700 mt-0.5" x-text="studentProfile.hp"></p>
                                 </div>
                             </a>
-                            
-                            <!-- <div x-show="!studentProfile.hp || studentProfile.hp === 'Tidak ada'" class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 opacity-60 mt-2">
-                                <div class="w-12 h-12 rounded-xl bg-slate-200 flex items-center justify-center text-slate-400 text-xl shrink-0">📞</div>
-                                <div>
-                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Kontak</p>
-                                    <p class="text-sm font-bold text-slate-500 mt-0.5">Nomor tidak tersedia</p>
-                                </div>
-                            </div> -->
                         </div>
                     </div>
                 </div>
