@@ -8,6 +8,17 @@ use App\Http\Controllers\MuridController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PasswordResetRequestController;
 
+// Route khusus SuperAdmin (Cari grup ini di file web.php kamu)
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
+    
+    // ... rute superadmin lainnya yang sudah ada (seperti dashboard, reset, dll) ...
+
+    // Tambahkan 3 baris ini untuk Manajemen Pengguna:
+    Route::post('/superadmin/users', [SuperAdminController::class, 'store'])->name('superadmin.users.store');
+    Route::patch('/superadmin/users/{id}/toggle', [SuperAdminController::class, 'toggle'])->name('superadmin.users.toggle');
+    Route::delete('/superadmin/users/{id}', [SuperAdminController::class, 'destroy'])->name('superadmin.users.destroy');
+});
+
 // Rute Publik (Untuk mengirim permohonan dari halaman login)
 Route::post('/request-reset', [PasswordResetRequestController::class, 'store'])->name('password.admin.request');
 

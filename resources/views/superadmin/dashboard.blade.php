@@ -28,8 +28,9 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 
+    {{-- WRAPPER UTAMA: Mengatur Modal, Role di Modal, dan Tab Aktif --}}
     <div class="relative min-h-screen bg-slate-50 overflow-hidden font-sans selection:bg-slate-200 selection:text-slate-900 pb-20" 
-         x-data="{ openModal: false, roleMode: 'murid' }">
+         x-data="{ openModal: false, roleMode: 'murid', activeTab: 'murid' }">
         
         <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
             <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-slate-300/30 rounded-full blur-[120px] animate-float"></div>
@@ -56,6 +57,7 @@
         <div class="py-8 relative z-10">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
 
+                {{-- ALERT SUKSES --}}
                 @if(session('success'))
                     <div x-data="{ show: true }" x-show="show" x-transition.opacity.duration.500ms x-init="setTimeout(() => show = false, 7000)" class="animate-slide-up bg-white border-l-4 border-green-500 px-6 py-4 rounded-2xl shadow-xl shadow-green-500/10 flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -66,6 +68,7 @@
                     </div>
                 @endif
 
+                {{-- ALERT ERROR --}}
                 @if ($errors->any())
                     <div class="animate-slide-up bg-white border-l-4 border-red-500 text-slate-700 px-6 py-4 rounded-2xl shadow-xl shadow-red-500/10">
                         <div class="flex items-center gap-3 mb-2">
@@ -80,6 +83,7 @@
                     </div>
                 @endif
 
+                {{-- 1. BAGIAN PERMOHONAN RESET SANDI (KEMBALI SEPERTI SEMULA) --}}
                 <div class="glass-panel rounded-[2rem] shadow-xl shadow-slate-900/5 p-6 border border-white relative overflow-hidden animate-slide-up" style="animation-delay: 100ms;">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-amber-400/20 rounded-bl-full blur-2xl -z-10"></div>
 
@@ -134,8 +138,7 @@
                                         </form>
                                         <form action="{{ route('superadmin.reset.approve', $request->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mereset password user ini?');" class="m-0">
                                             @csrf @method('PATCH')
-                                            <button type="submit" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold rounded-xl shadow-lg shadow-amber-500/20 transition transform hover:-translate-y-0.5 flex items-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            <button type="submit" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold transition transform hover:-translate-y-0.5 shadow-md shadow-amber-500/30 text-xs">
                                                 Setujui & Reset
                                             </button>
                                         </form>
@@ -143,7 +146,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="px-6 py-10 text-center text-slate-400 font-semibold bg-white/50">
+                                    <td colspan="3" class="px-6 py-12 text-center text-slate-400 font-medium">
                                         <div class="text-4xl mb-3 opacity-50">✨</div>
                                         Tidak ada permohonan reset sandi saat ini.
                                     </td>
@@ -154,8 +157,10 @@
                     </div>
                 </div>
 
+                {{-- 2. BAGIAN MANAJEMEN PENGGUNA (TAB MURID & GURU) --}}
                 <div class="animate-slide-up" style="animation-delay: 200ms;">
                     
+                    {{-- HEADER DAN TOMBOL AKSI --}}
                     <div class="glass-panel rounded-[2rem] p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 mb-6">
                         <div class="flex items-center gap-4">
                             <div class="p-3.5 bg-gradient-to-br from-slate-700 to-slate-900 text-white rounded-2xl shadow-inner border border-slate-600">
@@ -170,66 +175,83 @@
                             <a href="{{ route('superadmin.laporan') }}" target="_blank" class="flex-1 md:flex-none justify-center px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 rounded-xl font-extrabold shadow-sm hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2 group">
                                 <span class="group-hover:-translate-y-0.5 transition-transform">🖨️</span> Cetak PDF
                             </a>
-
                             <button @click="openModal = true" class="flex-1 md:flex-none justify-center px-6 py-3 bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-xl font-extrabold shadow-lg shadow-slate-900/20 hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                User Baru
+                                Tambah Akun
                             </button>
                         </div>
                     </div>
 
-                    <div class="glass-panel rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
-                        <div class="overflow-x-auto custom-scrollbar">
-                            <table class="w-full text-sm text-left text-slate-600">
-                                <thead class="bg-slate-50/80 border-b border-slate-100 text-slate-500 font-extrabold uppercase text-[11px] tracking-wider">
-                                    <tr>
-                                        <th class="px-6 py-5">Identitas Pengguna</th>
-                                        <th class="px-6 py-5">Informasi Data</th>
-                                        <th class="px-6 py-5 text-center">Hak Akses</th>
-                                        <th class="px-6 py-5 text-center">Status</th>
+                    {{-- KOTAK DAFTAR AKUN --}}
+                    <div class="bg-white/90 backdrop-blur-md border border-slate-200 rounded-3xl shadow-sm overflow-hidden mt-6">
+                        
+                        {{-- NAVIGASI TAB --}}
+                        <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-800 tracking-tight">Daftar Akun Pengguna</h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1">Kelola data akses siswa dan guru secara terpisah.</p>
+                            </div>
+                            
+                            <div class="flex bg-slate-200/60 p-1.5 rounded-xl w-max">
+                                <button @click="activeTab = 'murid'"
+                                        :class="activeTab === 'murid' ? 'bg-white text-blue-700 shadow-sm font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'"
+                                        class="px-4 py-2 text-sm rounded-lg transition-all flex items-center gap-2 outline-none">
+                                    🎓 Siswa
+                                    <span :class="activeTab === 'murid' ? 'bg-blue-100 text-blue-700' : 'bg-slate-300/50 text-slate-600'" 
+                                          class="py-0.5 px-2.5 rounded-full text-[10px] font-bold transition-colors">
+                                        {{ $users->where('role', 'murid')->count() }}
+                                    </span>
+                                </button>
+                                <button @click="activeTab = 'guru'"
+                                        :class="activeTab === 'guru' ? 'bg-white text-emerald-700 shadow-sm font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'"
+                                        class="px-4 py-2 text-sm rounded-lg transition-all flex items-center gap-2 outline-none">
+                                    👨‍🏫 Guru
+                                    <span :class="activeTab === 'guru' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-300/50 text-slate-600'" 
+                                          class="py-0.5 px-2.5 rounded-full text-[10px] font-bold transition-colors">
+                                        {{ $users->where('role', 'guru')->count() }}
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- TAB: DATA SISWA --}}
+                        <div x-show="activeTab === 'murid'" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-cloak
+                             class="overflow-x-auto custom-scrollbar">
+                             
+                            <table class="w-full text-left border-collapse min-w-[600px]">
+                                <thead>
+                                    <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-extrabold">
+                                        <th class="px-6 py-4">Profil Siswa</th>
+                                        <th class="px-6 py-4">NIS</th>
+                                        <th class="px-6 py-4">Jurusan</th>
+                                        <th class="px-6 py-4 text-center">Status Akses</th>
+                                        <th class="px-6 py-4 text-center">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-slate-100 bg-white/40">
-                                    @foreach($users as $user)
-                                    <tr class="hover:bg-slate-50/80 transition-colors group">
-                                        <td class="px-6 py-5">
-                                            <div class="flex items-center gap-4">
-                                                @if($user->avatar)
-                                                    <img src="{{ asset('storage/' . $user->avatar) }}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-slate-200">
-                                                @else
-                                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-600 font-black shadow-inner shrink-0 border border-slate-300">
-                                                        {{ substr($user->name, 0, 1) }}
-                                                    </div>
-                                                @endif
+                                <tbody class="divide-y divide-slate-100">
+                                    @forelse($users->where('role', 'murid') as $user)
+                                    <tr class="hover:bg-blue-50/30 transition-colors group">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 flex items-center justify-center font-black shadow-inner border border-blue-300/50 shrink-0">
+                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                </div>
                                                 <div>
-                                                    <div class="font-extrabold text-slate-900 text-base group-hover:text-blue-600 transition-colors">{{ $user->name }}</div>
-                                                    <div class="text-xs font-semibold text-slate-500 mt-0.5">{{ $user->email }}</div>
+                                                    <p class="text-sm font-bold text-slate-800">{{ $user->name }}</p>
+                                                    <p class="text-[11px] font-medium text-slate-500">{{ $user->email }}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-5">
-                                            <div class="text-xs font-bold text-slate-700 mb-1.5">ID/NIS: {{ $user->nis_nip ?? 'Belum Diatur' }}</div>
-                                            @if($user->role == 'murid')
-                                                <div class="flex flex-wrap items-center gap-1.5">
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded border border-indigo-100 text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700">
-                                                        Kelas: {{ $user->kelas ?? '-' }}
-                                                    </span>
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded border border-sky-100 text-[10px] font-black uppercase tracking-wider bg-sky-50 text-sky-700">
-                                                        {{ $user->jurusan ?? '-' }}
-                                                    </span>
-                                                </div>
-                                            @else
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded border border-slate-200 text-xs font-black bg-slate-100 text-slate-600">
-                                                    🏫 Staff Sekolah
-                                                </span>
-                                            @endif
+                                        <td class="px-6 py-4 text-sm font-semibold text-slate-700">{{ $user->nis_nip ?? '-' }}</td>
+                                        <td class="px-6 py-4">
+                                            <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-xs font-bold border border-slate-200">{{ $user->jurusan ?? '-' }}</span>
                                         </td>
-                                        <td class="px-6 py-5 text-center align-middle">
-                                            <span class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border shadow-sm {{ $user->role == 'guru' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200' }}">
-                                                {{ $user->role }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-5 text-center align-middle">
+                                        <td class="px-6 py-4 text-center align-middle">
+                                            {{-- Fitur Ubah Status Aktif/Nonaktif --}}
                                             <form action="{{ route('superadmin.users.toggle', $user->id) }}" method="POST" class="m-0">
                                                 @csrf @method('PATCH')
                                                 <button type="submit" class="text-xs font-extrabold px-4 py-2 rounded-xl border shadow-sm transition-all duration-300 {{ $user->is_active ? 'bg-green-500 text-white border-green-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200' : 'bg-white text-slate-400 border-slate-200 hover:bg-green-500 hover:text-white hover:border-green-600' }}">
@@ -237,96 +259,170 @@
                                                 </button>
                                             </form>
                                         </td>
+                                        <td class="px-6 py-4 text-center">
+                                            {{-- Fitur Hapus --}}
+                                            <form action="{{ route('superadmin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus akun siswa ini? Semua data laporan miliknya mungkin akan ikut terhapus.');" class="inline-block">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus Akun">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                </button>
+                                            </form>
+                                        </td>
                                     </tr>
-                                    @endforeach
+                                    @empty
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-12 text-center">
+                                            <div class="inline-flex flex-col items-center justify-center text-slate-400">
+                                                <svg class="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                                <span class="font-medium text-sm">Belum ada data siswa terdaftar.</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </div>
 
-                <div x-cloak x-show="openModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-                    <div x-show="openModal" x-transition.opacity.duration.300ms class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="openModal = false"></div>
-                    
-                    <div x-show="openModal" 
-                         x-transition:enter="transition ease-out duration-300"
-                         x-transition:enter-start="opacity-0 translate-y-8 scale-95"
-                         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                         class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg relative z-10 max-h-[90vh] flex flex-col overflow-hidden border border-slate-100">
-                        
-                        <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 z-20">
-                            <div>
-                                <h3 class="text-2xl font-black text-slate-900 tracking-tight">Registrasi Akun</h3>
-                                <p class="text-sm text-slate-500 font-medium mt-1">Tambahkan pengguna baru ke sistem.</p>
-                            </div>
-                            <button @click="openModal = false" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors focus:outline-none">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
+                        {{-- TAB: DATA GURU --}}
+                        <div x-show="activeTab === 'guru'" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-cloak
+                             class="overflow-x-auto custom-scrollbar">
+                             
+                            <table class="w-full text-left border-collapse min-w-[600px]">
+                                <thead>
+                                    <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-extrabold">
+                                        <th class="px-6 py-4">Profil Guru</th>
+                                        <th class="px-6 py-4">NIP</th>
+                                        <th class="px-6 py-4 text-center">Status Akses</th>
+                                        <th class="px-6 py-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    @forelse($users->where('role', 'guru') as $user)
+                                    <tr class="hover:bg-emerald-50/30 transition-colors group">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-700 flex items-center justify-center font-black shadow-inner border border-emerald-300/50 shrink-0">
+                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-bold text-slate-800">{{ $user->name }}</p>
+                                                    <p class="text-[11px] font-medium text-slate-500">{{ $user->email }}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm font-semibold text-slate-700">{{ $user->nis_nip ?? '-' }}</td>
+                                        <td class="px-6 py-4 text-center align-middle">
+                                            {{-- Fitur Ubah Status Aktif/Nonaktif --}}
+                                            <form action="{{ route('superadmin.users.toggle', $user->id) }}" method="POST" class="m-0">
+                                                @csrf @method('PATCH')
+                                                <button type="submit" class="text-xs font-extrabold px-4 py-2 rounded-xl border shadow-sm transition-all duration-300 {{ $user->is_active ? 'bg-green-500 text-white border-green-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200' : 'bg-white text-slate-400 border-slate-200 hover:bg-green-500 hover:text-white hover:border-green-600' }}">
+                                                    {{ $user->is_active ? '✅ Aktif' : '❌ Nonaktif' }}
+                                                </button>
+                                            </form>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            {{-- Fitur Hapus --}}
+                                            <form action="{{ route('superadmin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus akun guru ini?');" class="inline-block">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus Akun">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-12 text-center">
+                                            <div class="inline-flex flex-col items-center justify-center text-slate-400">
+                                                <svg class="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                                <span class="font-medium text-sm">Belum ada data guru terdaftar.</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
 
-                        <div class="p-8 overflow-y-auto custom-scrollbar bg-white">
-                            <form action="{{ route('superadmin.users.store') }}" method="POST" class="space-y-5">
-                                @csrf
-                                
-                                <div>
-                                    <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Nama Lengkap (Username Login)</label>
-                                    <input type="text" name="name" required placeholder="Masukkan nama..." class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-medium transition-shadow">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Email Akses</label>
-                                    <input type="email" name="email" required placeholder="contoh@sekolah.com" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-medium transition-shadow">
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-5">
-                                    <div>
-                                        <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Role Akun</label>
-                                        <select name="role" x-model="roleMode" required class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 transition-shadow font-bold text-slate-700">
-                                            <option value="murid">🎓 Murid Siswa</option>
-                                            <option value="guru">💼 Guru / Staff</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-extrabold text-slate-700 mb-1.5">NIS / NIP</label>
-                                        <input type="text" name="nis_nip" required placeholder="Nomor Induk" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-medium transition-shadow">
-                                    </div>
-                                </div>
-
-                                <div x-show="roleMode === 'murid'" 
-                                     x-transition
-                                     class="grid grid-cols-2 gap-5 p-5 bg-slate-50/80 rounded-2xl border border-slate-200">
-                                    <div>
-                                        <label class="block text-[11px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Tingkat Kelas</label>
-                                        <select name="kelas" class="w-full bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-slate-800">
-                                            <option value="">Pilih Kelas</option>
-                                            <option value="X">X (Sepuluh)</option>
-                                            <option value="XI">XI (Sebelas)</option>
-                                            <option value="XII">XII (Dua Belas)</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[11px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Jurusan</label>
-                                        <input type="text" name="jurusan" placeholder="Contoh: RPL" class="w-full bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-slate-800">
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Password Awal (Min. 8 Karakter)</label>
-                                    <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-medium transition-shadow">
-                                </div>
-
-                                <div class="pt-4 mt-6 border-t border-slate-100 flex justify-end gap-3">
-                                    <button type="button" @click="openModal = false" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors">Batal</button>
-                                    <button type="submit" class="px-8 py-3.5 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black text-white rounded-xl font-extrabold shadow-lg shadow-slate-900/20 transition transform hover:-translate-y-0.5 flex items-center gap-2">
-                                        Simpan Akun
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
                     </div>
                 </div>
-
             </div>
         </div>
+
+        {{-- 3. MODAL TAMBAH AKUN BARU (KEMBALI SEPERTI SEMULA) --}}
+        <div x-cloak x-show="openModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <div x-show="openModal" x-transition.opacity.duration.300ms class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="openModal = false"></div>
+            
+            <div x-show="openModal" 
+                 x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-8 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-8 scale-95"
+                 class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg relative z-10 overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
+                
+                <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+                    <div>
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tight">Tambah Akun Baru</h3>
+                        <p class="text-sm text-slate-500 font-medium mt-1">Daftarkan akses untuk Siswa atau Guru.</p>
+                    </div>
+                    <button @click="openModal = false" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <div class="p-8 overflow-y-auto custom-scrollbar">
+                    <form action="{{ route('superadmin.users.store') }}" method="POST" class="space-y-6">
+                        @csrf 
+                        
+                        <div>
+                            <label class="block text-sm font-extrabold text-slate-700 mb-2">Nama Lengkap</label>
+                            <input type="text" name="name" required placeholder="Masukkan nama..." class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow">
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-extrabold text-slate-700 mb-2">Email Akun</label>
+                                <input type="email" name="email" required placeholder="email@sekolah.com" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-extrabold text-slate-700 mb-2">Peran Akses (Role)</label>
+                                <select name="role" x-model="roleMode" required class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow appearance-none cursor-pointer">
+                                    <option value="murid">👨‍🎓 Siswa</option>
+                                    <option value="guru">👨‍🏫 Guru / Staff</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-5" :class="roleMode === 'murid' ? 'md:grid-cols-2' : ''">
+                            <div>
+                                <label class="block text-sm font-extrabold text-slate-700 mb-2" x-text="roleMode === 'guru' ? 'NIP (Nomor Induk Pegawai)' : 'NIS (Nomor Induk Siswa)'"></label>
+                                <input type="text" name="nis_nip" placeholder="Opsional..." class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow">
+                            </div>
+                            
+                            <div x-show="roleMode === 'murid'" x-transition class="w-full">
+                                <label class="block text-sm font-extrabold text-slate-700 mb-2">Jurusan (Khusus Siswa)</label>
+                                <input type="text" name="jurusan" placeholder="Contoh: RPL, TKJ..." class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Password Awal (Min. 8 Karakter)</label>
+                            <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-medium transition-shadow">
+                        </div>
+
+                        <div class="pt-4 mt-6 border-t border-slate-100 flex justify-end gap-3">
+                            <button type="button" @click="openModal = false" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors">Batal</button>
+                            <button type="submit" class="px-8 py-3.5 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black text-white rounded-xl font-extrabold shadow-lg shadow-slate-900/20 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                                Simpan Akun
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 </x-app-layout>
