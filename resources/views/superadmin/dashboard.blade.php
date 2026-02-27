@@ -227,7 +227,7 @@
                                     <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-extrabold">
                                         <th class="px-6 py-4">Profil Siswa</th>
                                         <th class="px-6 py-4">NIS</th>
-                                        <th class="px-6 py-4">Jurusan</th>
+                                        <th class="px-6 py-4">Kelas & Jurusan</th>
                                         <th class="px-6 py-4 text-center">Status Akses</th>
                                         <th class="px-6 py-4 text-center">Aksi</th>
                                     </tr>
@@ -248,8 +248,10 @@
                                         </td>
                                         <td class="px-6 py-4 text-sm font-semibold text-slate-700">{{ $user->nis_nip ?? '-' }}</td>
                                         <td class="px-6 py-4">
-                                            <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-xs font-bold border border-slate-200">{{ $user->jurusan ?? '-' }}</span>
-                                        </td>
+    <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-xs font-bold border border-slate-200">
+        {{ $user->kelas ?? '-' }} {{ $user->jurusan ?? '-' }}
+    </span>
+</td>
                                         <td class="px-6 py-4 text-center align-middle">
                                             {{-- Fitur Ubah Status Aktif/Nonaktif --}}
                                             <form action="{{ route('superadmin.users.toggle', $user->id) }}" method="POST" class="m-0">
@@ -396,7 +398,34 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 gap-5" :class="roleMode === 'murid' ? 'md:grid-cols-2' : ''">
+                        <div class="mb-5">
+                            <label class="block text-sm font-extrabold text-slate-700 mb-2" x-text="roleMode === 'guru' ? 'NIP (Nomor Induk Pegawai)' : 'NIS (Nomor Induk Siswa)'"></label>
+                            <input type="text" name="nis_nip" placeholder="Opsional..." class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow">
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5" x-show="roleMode === 'murid'" x-transition x-cloak>
+    <div>
+        <label class="block text-sm font-extrabold text-slate-700 mb-2">Kelas</label>
+        <select name="kelas" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow cursor-pointer">
+            <option value="" disabled selected>-- Pilih Kelas --</option>
+            <option value="10">Kelas 10 (X)</option>
+            <option value="11">Kelas 11 (XI)</option>
+            <option value="12">Kelas 12 (XII)</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-extrabold text-slate-700 mb-2">Jurusan</label>
+        <select name="jurusan" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow cursor-pointer">
+            <option value="" disabled selected>-- Pilih Jurusan --</option>
+            <option value="RPL">RPL</option>
+            <option value="MPLB">MPLB</option>
+            <option value="AKL">AKL</option>
+            <option value="TKR">TKR</option>
+        </select>
+    </div>
+</div>
+
+                        <!-- <div class="grid grid-cols-1 gap-5" :class="roleMode === 'murid' ? 'md:grid-cols-2' : ''">
                             <div>
                                 <label class="block text-sm font-extrabold text-slate-700 mb-2" x-text="roleMode === 'guru' ? 'NIP (Nomor Induk Pegawai)' : 'NIS (Nomor Induk Siswa)'"></label>
                                 <input type="text" name="nis_nip" placeholder="Opsional..." class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow">
@@ -406,7 +435,7 @@
                                 <label class="block text-sm font-extrabold text-slate-700 mb-2">Jurusan (Khusus Siswa)</label>
                                 <input type="text" name="jurusan" placeholder="Contoh: RPL, TKJ..." class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow">
                             </div>
-                        </div>
+                        </div> -->
 
                         <div>
                             <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Password Awal (Min. 8 Karakter)</label>

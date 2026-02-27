@@ -8,30 +8,29 @@ use App\Http\Controllers\MuridController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PasswordResetRequestController;
 
-// Route khusus SuperAdmin (Cari grup ini di file web.php kamu)
-Route::middleware(['auth', 'role:superadmin'])->group(function () {
-    
-    // ... rute superadmin lainnya yang sudah ada (seperti dashboard, reset, dll) ...
+Route::get('/', function () {
+    return view('welcome');
+});
 
-    // Tambahkan 3 baris ini untuk Manajemen Pengguna:
+// Rute Publik (Untuk permohonan reset dari halaman login)
+Route::post('/request-reset', [PasswordResetRequestController::class, 'store'])->name('password.admin.request');
+
+// =======================================================
+// ROUTE KHUSUS SUPERADMIN (Sudah Digabung & Dirapikan)
+// =======================================================
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
+    // Dashboard & Cetak Laporan PDF
+    Route::get('/superadmin/dashboard', [SuperAdminController::class, 'index'])->name('superadmin.dashboard');
+    Route::get('/superadmin/laporan', [SuperAdminController::class, 'laporan'])->name('superadmin.laporan');
+    
+    // Manajemen Pengguna (Simpan, Status Aktif, Hapus)
     Route::post('/superadmin/users', [SuperAdminController::class, 'store'])->name('superadmin.users.store');
     Route::patch('/superadmin/users/{id}/toggle', [SuperAdminController::class, 'toggle'])->name('superadmin.users.toggle');
     Route::delete('/superadmin/users/{id}', [SuperAdminController::class, 'destroy'])->name('superadmin.users.destroy');
-});
 
-// Rute Publik (Untuk mengirim permohonan dari halaman login)
-Route::post('/request-reset', [PasswordResetRequestController::class, 'store'])->name('password.admin.request');
-
-// Rute Khusus Superadmin (Pastikan diletakkan di dalam grup middleware auth/superadmin kamu)
-Route::middleware(['auth'])->group(function () {
-    // ... rute superadmin lainnya ...
-    
+    // Persetujuan Lupa Password
     Route::patch('/superadmin/reset-requests/{id}/approve', [PasswordResetRequestController::class, 'approve'])->name('superadmin.reset.approve');
     Route::delete('/superadmin/reset-requests/{id}', [PasswordResetRequestController::class, 'destroy'])->name('superadmin.reset.reject');
-});
-
-Route::get('/', function () {
-    return view('welcome');
 });
 
 // Route khusus Admin
@@ -39,14 +38,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::post('/admin/users', [AdminController::class, 'store'])->name('admin.users.store');
     Route::delete('/admin/users/{id}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
-});
-
-// Route khusus SuperAdmin
-Route::middleware(['auth', 'role:superadmin'])->group(function () {
-    Route::get('/superadmin/dashboard', [SuperAdminController::class, 'index'])->name('superadmin.dashboard');
-    Route::post('/superadmin/users', [SuperAdminController::class, 'storeUser'])->name('superadmin.users.store');
-    Route::patch('/superadmin/users/{id}/toggle', [SuperAdminController::class, 'toggleStatus'])->name('superadmin.users.toggle');
-    Route::get('/superadmin/laporan', [SuperAdminController::class, 'laporan'])->name('superadmin.laporan');
 });
 
 // Route khusus Guru
@@ -73,18 +64,17 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Smart Redirect Dashboard (Sudah disempurnakan agar Admin tidak nyasar)
+// Smart Redirect Dashboard
 Route::get('/dashboard', function () {
     $role = auth()->user()->role;
     
     if ($role === 'superadmin') {
         return redirect()->route('superadmin.dashboard');
     } elseif ($role === 'admin') {
-        return redirect()->route('admin.dashboard'); // <-- LOGIKA BARU DITAMBAHKAN
+        return redirect()->route('admin.dashboard'); 
     } elseif ($role === 'guru') {
         return redirect()->route('guru.dashboard');
     } else {
-        // Jika bukan ketiga di atas (berarti murid), arahkan ke sini
         return redirect()->route('murid.dashboard');
     }
 })->middleware(['auth', 'verified'])->name('dashboard');

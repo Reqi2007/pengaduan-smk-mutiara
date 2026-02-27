@@ -23,7 +23,7 @@ class SuperAdminController extends Controller
         return view('superadmin.dashboard', compact('users', 'resetRequests'));
     }
 
-    // 2. Menyimpan User Baru (Nama diubah kepada 'store' untuk mengelakkan ralat)
+    // 2. Menyimpan User Baru (Beserta Kelas & Jurusan)
     public function store(Request $request)
     {
         $request->validate([
@@ -32,6 +32,8 @@ class SuperAdminController extends Controller
             'password' => 'required|string|min:8',
             'role'     => 'required|in:guru,murid,admin',
             'nis_nip'  => 'nullable|string',
+            'kelas'    => 'nullable|string',
+            'jurusan'  => 'nullable|string',
         ]);
 
         User::create([
@@ -45,10 +47,10 @@ class SuperAdminController extends Controller
             'jurusan'   => $request->jurusan,
         ]);
 
-        return redirect()->back()->with('success', 'Akaun ' . $request->name . ' berjaya ditambah!');
+        return redirect()->back()->with('success', 'Akun ' . $request->name . ' berhasil ditambahkan!');
     }
 
-    // 3. Mengubah Status Aktif/Nyahaktif User (Nama diubah kepada 'toggle')
+    // 3. Mengubah Status Aktif/Nonaktif User
     public function toggle($id)
     {
         $user = User::findOrFail($id);
@@ -57,31 +59,27 @@ class SuperAdminController extends Controller
             'is_active' => !$user->is_active 
         ]);
 
-        return redirect()->back()->with('success', 'Status akaun ' . $user->name . ' berjaya dikemas kini.');
+        return redirect()->back()->with('success', 'Status akun ' . $user->name . ' berhasil diperbarui.');
     }
 
-    // 4. Menghapus Akaun Pengguna (Fungsi baharu untuk butang Hapus)
+    // 4. Menghapus Akun Pengguna
     public function destroy($id)
     {
         $user = User::findOrFail($id);
 
-        // Langkah keselamatan: Elak Superadmin terpadam akaun sendiri
         if (auth()->id() == $user->id) {
-            return redirect()->back()->withErrors(['Maaf, anda tidak boleh menghapus akaun milik anda sendiri.']);
+            return redirect()->back()->withErrors(['Maaf, Anda tidak bisa menghapus akun Anda sendiri.']);
         }
 
-        // Padam pengguna dari pangkalan data
         $user->delete();
 
-        return redirect()->back()->with('success', 'Akaun pengguna berjaya dihapuskan!');
+        return redirect()->back()->with('success', 'Akun pengguna berhasil dihapus!');
     }
 
-    // =========================================================================
-    // PENTING: Biarkan kod fungsi laporan() asli anda di bawah ini!
-    // Jangan padam fungsi ini supaya ciri cetak PDF anda kekal berfungsi.
-    // =========================================================================
+    // 5. Cetak Laporan PDF
     public function laporan()
     {
-        // (Kod asal laporan anda kekal di sini)
+        $pengaduans = Pengaduan::with(['user', 'kategori'])->latest()->get();
+        return view('superadmin.laporan', compact('pengaduans'));
     }
 }
