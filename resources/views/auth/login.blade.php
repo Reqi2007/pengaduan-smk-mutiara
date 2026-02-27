@@ -113,11 +113,15 @@
             </div>
 
             <x-auth-session-status class="mb-4 text-sm font-bold text-green-600 bg-green-50 p-3 rounded-xl text-center" :status="session('status')" />
+            
             @if ($errors->any())
                 <div class="mb-4 text-sm font-bold text-red-600 bg-red-50 p-3 rounded-xl text-center">
                     {{ $errors->first() }}
                 </div>
             @endif
+
+            <div id="login-error-message" class="hidden mb-4 text-sm font-bold text-red-600 bg-red-50 p-3 rounded-xl text-center">
+            </div>
 
             <form method="POST" action="{{ route('login') }}" id="login-form">
                 @csrf
@@ -193,59 +197,107 @@
                 document.body.classList.add('page-enter-active');
             }));
 
-            // ====== LOGIKA ANIMASI POP-UP & TYPING ======
             const loginForm = document.getElementById('login-form');
             const btnSubmit = document.getElementById('btn-submit');
+            const errorMessage = document.getElementById('login-error-message');
             
-            loginForm.addEventListener('submit', function(e) {
+            loginForm.addEventListener('submit', async function(e) {
                 e.preventDefault(); 
 
                 const nameInput = document.getElementById('name').value.trim() || 'Pengguna';
+                const passwordInput = document.getElementById('password').value;
+                const token = document.querySelector('input[name="_token"]').value;
+                
                 const tetoContainer = document.getElementById('teto-container');
                 const tetoBubble = document.getElementById('teto-bubble');
                 const tetoText = document.getElementById('teto-text');
+                const loginBox = document.getElementById('login-box');
+                
+                // Sembunyikan error saat mau submit ulang
+                errorMessage.classList.add('hidden');
+                errorMessage.innerText = '';
+
+                // Simpan desain tombol original untuk dikembalikan jika error
+                const originalBtnContent = btnSubmit.innerHTML;
                 
                 btnSubmit.disabled = true;
-                btnSubmit.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sedang masuk...`;
+                btnSubmit.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sedang memeriksa...`;
                 
-                // Meredupkan form login
-                document.getElementById('login-box').style.opacity = "0.05";
-                document.getElementById('login-box').style.filter = "blur(4px)";
-                document.getElementById('login-box').style.transition = "all 0.8s";
+                try {
+                    // Cek username dan password ke server menggunakan Fetch API
+                    const response = await fetch("{{ route('login') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest', // Memberi tahu Laravel agar membalas dengan format JSON
+                            'X-CSRF-TOKEN': token
+                        },
+                        body: JSON.stringify({ 
+                            name: nameInput,
+                            password: passwordInput 
+                        })
+                    });
 
-                // Memunculkan GIF ke TENGAH layar
-                tetoContainer.classList.remove('opacity-0', 'translate-y-20');
-                tetoContainer.classList.add('opacity-100', 'translate-y-0');
-                
-                setTimeout(() => {
-                    tetoBubble.classList.remove('bubble-hidden');
-                    tetoBubble.classList.add('bubble-visible');
-                    
-                    const fullText = `Hallo selamat datang ${nameInput} di Aspirasi Fasilitas Sekolah, web ini dibuat oleh Refan!`;
-                    let i = 0;
-                    tetoText.innerHTML = '';
-                    tetoText.classList.add('typing-cursor');
+                    if (response.ok || response.redirected) {
+                        // ==========================================
+                        // JIKA BENAR: Jalankan Animasi
+                        // ==========================================
+                        loginBox.style.opacity = "0.05";
+                        loginBox.style.filter = "blur(4px)";
+                        loginBox.style.transition = "all 0.8s";
 
-                    const typeInterval = setInterval(() => {
-                        tetoText.innerHTML += fullText.charAt(i);
-                        i++;
+                        tetoContainer.classList.remove('opacity-0', 'translate-y-20');
+                        tetoContainer.classList.add('opacity-100', 'translate-y-0');
                         
-                        if (i >= fullText.length) {
-                            clearInterval(typeInterval);
-                            tetoText.classList.remove('typing-cursor'); 
+                        setTimeout(() => {
+                            tetoBubble.classList.remove('bubble-hidden');
+                            tetoBubble.classList.add('bubble-visible');
+                            
+                            const fullText = `Hallo selamat datang ${nameInput} di Aspirasi Fasilitas Sekolah, web ini dibuat oleh Refan!`;
+                            let i = 0;
+                            tetoText.innerHTML = '';
+                            tetoText.classList.add('typing-cursor');
 
-                            setTimeout(() => {
-                                document.body.classList.remove('page-enter-active');
-                                document.body.classList.add('page-exit-active');
+                            const typeInterval = setInterval(() => {
+                                tetoText.innerHTML += fullText.charAt(i);
+                                i++;
                                 
-                                setTimeout(() => {
-                                    HTMLFormElement.prototype.submit.call(loginForm);
-                                }, 400);
-                            }, 2000); 
-                        }
-                    }, 40);
+                                if (i >= fullText.length) {
+                                    clearInterval(typeInterval);
+                                    tetoText.classList.remove('typing-cursor'); 
 
-                }, 600);
+                                    setTimeout(() => {
+                                        document.body.classList.remove('page-enter-active');
+                                        document.body.classList.add('page-exit-active');
+                                        
+                                        // Arahkan ke dashboard otomatis setelah animasi beres
+                                        setTimeout(() => {
+                                            window.location.href = "{{ url('/dashboard') }}";
+                                        }, 400);
+                                    }, 2000); 
+                                }
+                            }, 40);
+
+                        }, 600);
+                    } else {
+                        // ==========================================
+                        // JIKA SALAH KREDENSIAL: Tampilkan Error
+                        // ==========================================
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = originalBtnContent;
+                        
+                        errorMessage.innerText = 'Nama atau password yang Anda masukkan salah.';
+                        errorMessage.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = originalBtnContent;
+                    
+                    errorMessage.innerText = 'Terjadi kesalahan pada server. Silakan coba lagi.';
+                    errorMessage.classList.remove('hidden');
+                }
             });
         });
 
