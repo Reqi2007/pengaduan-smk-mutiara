@@ -150,7 +150,7 @@
                                             </span> 
                                         @endif
                                     </td>
-                                    <td class="px-6 py-5 text-center align-middle">
+<td class="px-6 py-5 text-center align-middle">
     {{-- 1. TAMPILAN BADGE STATUS --}}
     @if($item->status == 'Menunggu') 
         <span class="bg-amber-100 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex items-center justify-center gap-1 w-max mx-auto"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Menunggu</span>
@@ -160,25 +160,72 @@
         <span class="bg-green-100 border border-green-200 text-green-700 px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex items-center justify-center gap-1 w-max mx-auto"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Selesai</span> 
     @endif
     
-    {{-- 2. TAMPILAN RATING & ULASAN SISWA --}}
+    {{-- 2. TOMBOL & DAFTAR ULASAN (DESAIN PROFESIONAL) --}}
     @if($item->status == 'Selesai')
-        <div class="mt-3 p-3 bg-white/80 border border-slate-200 rounded-xl shadow-sm max-w-[180px] mx-auto">
-            <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider mb-1">Penilaian Siswa</p>
+        <div x-data="{ openReviews: false }" class="mt-3 relative w-full flex flex-col items-center">
             
-            {{-- Jika ada rating, tampilkan bintang. (Ubah kata 'rating' di bawah jika nama kolom databasemu berbeda) --}}
-            @if(!empty($item->rating))
-                <div class="text-amber-400 text-sm flex justify-center drop-shadow-sm mb-1.5">
-                    @for($i=0; $i<$item->rating; $i++) ★ @endfor
-                </div>
-                
-                {{-- Tampilkan teks ulasan. (Ubah kata 'ulasan' jika nama kolom databasemu berbeda) --}}
-                <div class="text-[11px] text-slate-700 font-medium italic border-t border-slate-100 pt-1.5 mt-1.5 leading-relaxed">
-                    "{{ $item->ulasan ?? 'Siswa hanya memberi bintang tanpa ulasan' }}"
+            @if($item->ulasans->count() > 0)
+                {{-- Tombol Trigger yang Lebih Elegan --}}
+                <button @click="openReviews = !openReviews" 
+                        class="group inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 text-slate-600 hover:text-blue-700 rounded-xl text-[11px] font-bold transition-all duration-200 shadow-sm mx-auto focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    <span class="flex items-center gap-1.5">
+                        <span class="text-amber-400 text-sm drop-shadow-sm">★</span>
+                        <span>Lihat Ulasan ({{ $item->ulasans->count() }})</span>
+                    </span>
+                    <svg :class="{'rotate-180 text-blue-500': openReviews}" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+
+                {{-- Dropdown Container (Desain Card Modern) --}}
+                <div x-show="openReviews" 
+                     x-transition:enter="transition ease-out duration-300 origin-top" 
+                     x-transition:enter-start="opacity-0 scale-y-90 -translate-y-2" 
+                     x-transition:enter-end="opacity-100 scale-y-100 translate-y-0" 
+                     x-transition:leave="transition ease-in duration-200 origin-top" 
+                     x-transition:leave-start="opacity-100 scale-y-100 translate-y-0" 
+                     x-transition:leave-end="opacity-0 scale-y-90 -translate-y-2"
+                     x-cloak
+                     class="mt-2 w-full max-w-[280px] bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden text-left z-10 relative">
+                    
+                    {{-- Header Dropdown --}}
+                    <div class="bg-slate-50 px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Detail Penilaian</p>
+                        <p class="text-[10px] font-bold text-slate-400">{{ $item->ulasans->count() }} Review</p>
+                    </div>
+
+                    {{-- Scrollable Area ulasan --}}
+                    <div class="p-2 space-y-1 max-h-[180px] overflow-y-auto custom-scrollbar">
+                        @foreach($item->ulasans as $ulasan)
+                        <div class="p-2.5 hover:bg-slate-50 rounded-xl transition-colors border border-transparent hover:border-slate-100 group/item">
+                            <div class="flex items-start gap-3">
+                                {{-- Avatar Inisial Bulat --}}
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 flex items-center justify-center text-xs font-black shrink-0 border border-blue-200/50 shadow-inner">
+                                    {{ strtoupper(substr($ulasan->user->name ?? 'S', 0, 1)) }}
+                                </div>
+                                
+                                {{-- Konten Ulasan --}}
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between mb-0.5">
+                                        <p class="text-[11px] font-extrabold text-slate-800 truncate pr-2">{{ $ulasan->user->name ?? 'Siswa' }}</p>
+                                        <div class="text-amber-400 text-[10px] flex shrink-0 drop-shadow-sm" title="{{ $ulasan->rating }} Bintang">
+                                            @for($i=0; $i<$ulasan->rating; $i++) ★ @endfor
+                                        </div>
+                                    </div>
+                                    <p class="text-[11px] text-slate-600 font-medium leading-relaxed italic line-clamp-3">
+                                        "{{ $ulasan->komentar }}"
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- Garis Pemisah jika ada lebih dari 1 ulasan --}}
+                        @if(!$loop->last) <hr class="border-slate-100 mx-3 my-0.5"> @endif
+                        @endforeach
+                    </div>
                 </div>
             @else
-                {{-- Jika status sudah selesai tapi siswa belum memberi nilai --}}
-                <div class="text-[10px] text-slate-400 italic mt-1 bg-slate-50 p-1.5 rounded border border-slate-100">
-                    ⏳ Menunggu siswa memberi penilaian...
+                {{-- Tampilan Menunggu (Empty State yang lebih rapi) --}}
+                <div class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 border-dashed text-slate-400 rounded-lg text-[10px] font-bold mt-2 mx-auto">
+                    <svg class="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Menunggu Penilaian
                 </div>
             @endif
         </div>
