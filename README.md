@@ -29,7 +29,7 @@ cd C:\xampp\htdocs
 Lakukan *clone* repository GitHub ini:
 
 ```bash
-git clone [https://github.com/Reqi2007/pengaduan-smk-mutiara.git](https://github.com/Reqi2007/pengaduan-smk-mutiara.git)
+git clone https://github.com/Reqi2007/pengaduan-smk-mutiara.git
 
 ```
 
