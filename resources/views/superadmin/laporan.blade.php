@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -113,11 +113,44 @@
     </style>
 </head>
 <body>
+    @php
+        $selectedKategoriId = $filters['kategori_id'] ?? '';
+        $selectedKategori = $kategoris->firstWhere('id', $selectedKategoriId);
+        $tanggalAwal = $filters['tanggal_awal'] ?? '';
+        $tanggalAkhir = $filters['tanggal_akhir'] ?? '';
+    @endphp
+<div class="no-print" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 18px; margin-bottom: 30px; box-shadow: 0 12px 30px rgba(15,23,42,0.08);">
+        <form method="GET" action="{{ route('superadmin.laporan') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; align-items: end;">
+            <div>
+                <label style="display:block; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .08em;">Kategori</label>
+                <select name="kategori_id" style="width:100%; padding: 12px 14px; border:1px solid #cbd5e1; border-radius: 12px; font-family: Arial, sans-serif; font-size: 14px;">
+                    <option value="">Semua Kategori</option>
+                    @foreach($kategoris as $kategori)
+                        <option value="{{ $kategori->id }}" {{ (string) $selectedKategoriId === (string) $kategori->id ? 'selected' : '' }}>
+                            {{ $kategori->nama_kategori }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-    <div class="no-print" style="text-align: center; margin-bottom: 30px;">
-        <button onclick="window.print()" class="btn-print">🖨️ Cetak / Simpan sebagai PDF</button>
-        <p style="font-family: Arial, sans-serif; font-size: 13px; color: #666; margin-top: -10px;">
-            *Tip: Pada jendela print, ubah Tujuan (Destination) menjadi "Save as PDF" untuk mengunduh.
+            <div>
+                <label style="display:block; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .08em;">Tanggal Awal</label>
+                <input type="date" name="tanggal_awal" value="{{ $tanggalAwal }}" style="width:100%; padding: 12px 14px; border:1px solid #cbd5e1; border-radius: 12px; font-family: Arial, sans-serif; font-size: 14px;">
+            </div>
+
+            <div>
+                <label style="display:block; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .08em;">Tanggal Akhir</label>
+                <input type="date" name="tanggal_akhir" value="{{ $tanggalAkhir }}" style="width:100%; padding: 12px 14px; border:1px solid #cbd5e1; border-radius: 12px; font-family: Arial, sans-serif; font-size: 14px;">
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap: wrap;">
+                <a href="{{ route('superadmin.laporan') }}" class="btn-print" style="margin-bottom:0; background:#fff; color:#0f172a; border:1px solid #cbd5e1; box-shadow:none;">Reset</a>
+                <button type="submit" class="btn-print" style="margin-bottom:0;">Tampilkan Laporan</button>
+                <button type="button" onclick="window.print()" class="btn-print" style="margin-bottom:0; background:#0f172a;">Cetak PDF</button>
+            </div>
+        </form>
+        <p style="font-family: Arial, sans-serif; font-size: 13px; color: #64748b; margin: 12px 0 0;">
+            Data yang dicetak mengikuti filter kategori dan tanggal yang dipilih di atas.
         </p>
     </div>
 
@@ -190,12 +223,5 @@
         <p>Bandung, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>Mengetahui,</p>
         <p style="margin-top: 80px;"><strong>Kepala Sekolah / Admin</strong></p>
     </div>
-
-    <script>
-        window.onload = function() {
-            window.print();
-        };
-    </script>
-
 </body>
 </html>

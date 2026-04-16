@@ -25,6 +25,7 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
     
     // Manajemen Pengguna (Simpan, Status Aktif, Hapus)
     Route::post('/superadmin/users', [SuperAdminController::class, 'store'])->name('superadmin.users.store');
+    Route::patch('/superadmin/users/{id}', [SuperAdminController::class, 'update'])->name('superadmin.users.update');
     Route::patch('/superadmin/users/{id}/toggle', [SuperAdminController::class, 'toggle'])->name('superadmin.users.toggle');
     Route::delete('/superadmin/users/{id}', [SuperAdminController::class, 'destroy'])->name('superadmin.users.destroy');
 

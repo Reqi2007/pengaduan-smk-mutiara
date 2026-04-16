@@ -5,52 +5,175 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\PasswordResetRequest;
+use App\Models\Kategori;
 use App\Models\Pengaduan; 
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class SuperAdminController extends Controller
 {
     // 1. Menampilkan Halaman Dashboard Superadmin & Tabel User
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::where('role', '!=', 'superadmin')->latest()->get();
+        $view = $request->query('view', 'semua');
+        $sort = $request->query('sort', 'terbaru');
+        $kelas = $request->query('kelas', 'semua');
+        $jurusan = $request->query('jurusan', 'semua');
+
+        $query = User::whereIn('role', ['guru', 'murid']);
+
+        if ($view === 'murid') {
+            $query->where('role', 'murid');
+
+            if ($kelas !== 'semua') {
+                $query->where('kelas', $kelas);
+            }
+
+            if ($jurusan !== 'semua') {
+                $query->where('jurusan', $jurusan);
+            }
+        } elseif ($view === 'guru') {
+            $query->where('role', 'guru');
+        }
+
+        $query = match ($sort) {
+            'nama_asc' => $query->orderBy('name', 'asc'),
+            'nama_desc' => $query->orderBy('name', 'desc'),
+            'identitas_asc' => $query->orderBy('nis_nip', 'asc'),
+            'identitas_desc' => $query->orderBy('nis_nip', 'desc'),
+            'kelas_asc' => $query->orderBy('kelas', 'asc')->orderBy('jurusan', 'asc')->orderBy('name', 'asc'),
+            'kelas_desc' => $query->orderBy('kelas', 'desc')->orderBy('jurusan', 'desc')->orderBy('name', 'desc'),
+            'jurusan_asc' => $query->orderBy('jurusan', 'asc')->orderBy('kelas', 'asc')->orderBy('name', 'asc'),
+            'jurusan_desc' => $query->orderBy('jurusan', 'desc')->orderBy('kelas', 'desc')->orderBy('name', 'desc'),
+            'terlama' => $query->oldest(),
+            default => $query->latest(),
+        };
+
+        $users = $query->get();
         
         $resetRequests = PasswordResetRequest::with('user')
                             ->where('status', 'pending')
                             ->latest()
                             ->get();
-        
-        return view('superadmin.dashboard', compact('users', 'resetRequests'));
+
+        $counts = [
+            'semua' => User::whereIn('role', ['guru', 'murid'])->count(),
+            'murid' => User::where('role', 'murid')->count(),
+            'guru' => User::where('role', 'guru')->count(),
+        ];
+
+        $kelasOptions = ['10', '11', '12'];
+        $jurusanOptions = ['RPL', 'MPLB', 'AKL', 'TKR'];
+
+        return view('superadmin.dashboard', compact(
+            'users',
+            'resetRequests',
+            'view',
+            'sort',
+            'kelas',
+            'jurusan',
+            'counts',
+            'kelasOptions',
+            'jurusanOptions'
+        ));
     }
 
     // 2. Menyimpan User Baru (Beserta Kelas & Jurusan)
     public function store(Request $request)
     {
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'role'     => 'required|in:guru,murid,admin',
-            'nis_nip'  => 'nullable|string',
-            'kelas'    => 'nullable|string',
-            'jurusan'  => 'nullable|string',
-        ]);
+        $rules = [
+            'name' => ['required', 'string', 'max:255', 'unique:users,name'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
+            'role' => ['required', 'in:guru,murid'],
+        ];
+
+        if ($request->role === 'murid') {
+            $rules['nis_nip'] = ['required', 'digits:8', 'unique:users,nis_nip'];
+            $rules['kelas'] = ['required', 'in:10,11,12'];
+            $rules['jurusan'] = $request->kelas === '12'
+                ? ['required', 'in:RPL,MPLB,AKL,TKR']
+                : ['nullable', 'in:RPL,MPLB,AKL,TKR'];
+        } else {
+            $rules['nis_nip'] = ['required', 'digits:10', 'unique:users,nis_nip'];
+            $rules['kelas'] = ['nullable', 'in:10,11,12'];
+            $rules['jurusan'] = ['nullable', 'in:RPL,MPLB,AKL,TKR'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $kelasValue = $validated['role'] === 'murid' ? $validated['kelas'] : null;
+        $jurusanValue = $validated['role'] === 'murid' && $validated['kelas'] === '12'
+            ? ($validated['jurusan'] ?? null)
+            : null;
 
         User::create([
-            'name'      => $request->name,
-            'email'     => $request->email,
-            'password'  => Hash::make($request->password),
-            'role'      => $request->role,
+            'name'      => $validated['name'],
+            'email'     => $validated['email'],
+            'password'  => Hash::make($validated['password']),
+            'role'      => $validated['role'],
             'is_active' => true,
-            'nis_nip'   => $request->nis_nip,
-            'kelas'     => $request->kelas,
-            'jurusan'   => $request->jurusan,
+            'nis_nip'   => $validated['nis_nip'],
+            'kelas'     => $kelasValue,
+            'jurusan'   => $jurusanValue,
         ]);
 
-        return redirect()->back()->with('success', 'Akun ' . $request->name . ' berhasil ditambahkan!');
+        return redirect()->back()->with('success', 'Akun ' . $validated['name'] . ' berhasil ditambahkan!');
     }
 
-    // 3. Mengubah Status Aktif/Nonaktif User
+    // 3. Mengubah Info Akun Pengguna
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $rules = [
+            'name' => ['required', 'string', 'max:255', Rule::unique('users', 'name')->ignore($user->id)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'role' => ['required', 'in:guru,murid'],
+        ];
+
+        if ($request->role === 'murid') {
+            $rules['nis_nip'] = ['required', 'digits:8', Rule::unique('users', 'nis_nip')->ignore($user->id)];
+            $rules['kelas'] = ['required', 'in:10,11,12'];
+            $rules['jurusan'] = $request->kelas === '12'
+                ? ['required', 'in:RPL,MPLB,AKL,TKR']
+                : ['nullable', 'in:RPL,MPLB,AKL,TKR'];
+        } else {
+            $rules['nis_nip'] = ['required', 'digits:10', Rule::unique('users', 'nis_nip')->ignore($user->id)];
+            $rules['kelas'] = ['nullable', 'in:10,11,12'];
+            $rules['jurusan'] = ['nullable', 'in:RPL,MPLB,AKL,TKR'];
+        }
+
+        if ($request->filled('password')) {
+            $rules['password'] = ['required', 'string', 'min:8'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $kelasValue = $validated['role'] === 'murid' ? $validated['kelas'] : null;
+        $jurusanValue = $validated['role'] === 'murid' && $validated['kelas'] === '12'
+            ? ($validated['jurusan'] ?? null)
+            : null;
+
+        $payload = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'nis_nip' => $validated['nis_nip'],
+            'kelas' => $kelasValue,
+            'jurusan' => $jurusanValue,
+        ];
+
+        if ($request->filled('password')) {
+            $payload['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($payload);
+
+        return redirect()->back()->with('success', 'Informasi akun ' . $user->name . ' berhasil diperbarui.');
+    }
+
+    // 4. Mengubah Status Aktif/Nonaktif User
     public function toggle($id)
     {
         $user = User::findOrFail($id);
@@ -62,7 +185,7 @@ class SuperAdminController extends Controller
         return redirect()->back()->with('success', 'Status akun ' . $user->name . ' berhasil diperbarui.');
     }
 
-    // 4. Menghapus Akun Pengguna
+    // 5. Menghapus Akun Pengguna
     public function destroy($id)
     {
         $user = User::findOrFail($id);
@@ -76,10 +199,44 @@ class SuperAdminController extends Controller
         return redirect()->back()->with('success', 'Akun pengguna berhasil dihapus!');
     }
 
-    // 5. Cetak Laporan PDF
-    public function laporan()
+    // 6. Cetak Laporan PDF
+    public function laporan(Request $request)
     {
-        $pengaduans = Pengaduan::with(['user', 'kategori'])->latest()->get();
-        return view('superadmin.laporan', compact('pengaduans'));
+        $filters = $request->validate([
+            'kategori_id' => ['nullable', 'exists:kategoris,id'],
+            'tanggal_awal' => ['nullable', 'date'],
+            'tanggal_akhir' => ['nullable', 'date'],
+        ]);
+
+        $kategoriId = $filters['kategori_id'] ?? null;
+        $tanggalAwal = $filters['tanggal_awal'] ?? null;
+        $tanggalAkhir = $filters['tanggal_akhir'] ?? null;
+
+        $pengaduanQuery = Pengaduan::with(['user', 'kategori'])->latest();
+
+        if ($kategoriId) {
+            $pengaduanQuery->where('kategori_id', $kategoriId);
+        }
+
+        if ($tanggalAwal) {
+            $pengaduanQuery->whereDate('created_at', '>=', $tanggalAwal);
+        }
+
+        if ($tanggalAkhir) {
+            $pengaduanQuery->whereDate('created_at', '<=', $tanggalAkhir);
+        }
+
+        $pengaduans = $pengaduanQuery->get();
+        $kategoris = Kategori::orderBy('nama_kategori')->get();
+
+        return view('superadmin.laporan', [
+            'pengaduans' => $pengaduans,
+            'kategoris' => $kategoris,
+            'filters' => [
+                'kategori_id' => $kategoriId,
+                'tanggal_awal' => $tanggalAwal,
+                'tanggal_akhir' => $tanggalAkhir,
+            ],
+        ]);
     }
 }
