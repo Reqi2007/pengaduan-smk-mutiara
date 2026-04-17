@@ -139,12 +139,12 @@ Untuk memudahkan proses pengujian *role* (hak akses), Anda dapat masuk (*login*)
 
 **2. Akun Guru / Teknisi**
 
-* **Login dulu ke akun SuperAdmin setelah itu cari akun dummy Guru yang ingin di login**
+* **Login dulu ke akun SuperAdmin setelah itu cari akun dummy Guru yang ingin di login atau buat baru**
 * **Password:** `password123`
 
 **3. Akun Murid**
 
-* **Login dulu ke akun SuperAdmin setelah itu cari akun dummy siswa yang ingin di login**
+* **Login dulu ke akun SuperAdmin setelah itu cari akun dummy siswa yang ingin di login atau buat baru**
 * **Password:** `password123`
 
 *(Semua password *default* untuk akun dummy adalah `password123`)*
