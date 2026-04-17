@@ -29,12 +29,26 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 
+    @php
+        $adminWaNumber = '6282119096623';
+        $adminWaMessage = rawurlencode('Halo Admin SMK Mutiara, saya ingin melaporkan gangguan, kesalahan, atau respon yang lambat pada aplikasi pengaduan.');
+    @endphp
+
     <div class="relative min-h-screen bg-slate-50 overflow-hidden font-sans selection:bg-indigo-200 selection:text-indigo-900 pb-20"
          x-data="{ 
             openModal: false, 
             profileModal: false, 
-            selectedData: { id: '', status: '', feedback: '' }, 
-            studentProfile: { name: '', nis: '', kelas: '', jurusan: '', hp: '', avatar: '' } 
+            selectedData: { id: '', status: '', feedback: '', feedback_foto: '' }, 
+            studentProfile: { name: '', nis: '', kelas: '', jurusan: '', hp: '', avatar: '' },
+            validationError: '',
+            validateForm() {
+                this.validationError = '';
+                if ((this.selectedData.status === 'Proses' || this.selectedData.status === 'Selesai') && (!this.selectedData.feedback || this.selectedData.feedback.trim() === '')) {
+                    this.validationError = 'Feedback wajib diisi ketika status diubah ke Proses atau Selesai.';
+                    return false;
+                }
+                return true;
+            }
          }">
         
         <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -49,13 +63,19 @@
                     Meja Kerja Guru & Teknisi
                 </h2>
 
-                <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
-                    @csrf
-                    <button type="submit" class="px-5 py-2.5 bg-white text-red-500 hover:bg-red-500 hover:text-white border border-red-100 hover:border-red-500 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 shadow-sm hover:shadow-md hover:-translate-y-0.5 group">
-                        <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        Keluar
-                    </button>
-                </form>
+                <div class="flex items-center gap-3">
+                    <a href="https://wa.me/{{ $adminWaNumber }}?text={{ $adminWaMessage }}" target="_blank" class="px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.52 3.48A11.8 11.8 0 0 0 12.01 0C5.43 0 .08 5.34.08 11.92c0 2.1.55 4.14 1.6 5.94L0 24l6.32-1.66a11.9 11.9 0 0 0 5.69 1.45h.01c6.57 0 11.91-5.34 11.91-11.92 0-3.18-1.24-6.17-3.41-8.39ZM12.01 21.5h-.01a9.6 9.6 0 0 1-4.89-1.34l-.35-.2-3.75.99.99-3.65-.23-.37a9.58 9.58 0 0 1-1.47-5.11c0-5.31 4.32-9.63 9.64-9.63 2.57 0 4.98 1 6.8 2.82a9.55 9.55 0 0 1 2.81 6.81c0 5.32-4.31 9.68-9.54 9.68Zm5.57-7.19c-.3-.15-1.76-.87-2.03-.97-.27-.1-.46-.15-.65.15s-.75.97-.92 1.17-.34.23-.63.08a8.03 8.03 0 0 1-2.37-1.46 8.94 8.94 0 0 1-1.65-2.05c-.17-.3-.02-.46.13-.61.13-.13.3-.34.45-.51.15-.17.2-.29.3-.49.1-.2.05-.38-.02-.53-.07-.15-.65-1.56-.9-2.14-.24-.57-.49-.49-.65-.5-.17-.01-.36-.01-.55-.01s-.5.07-.76.38-.98.96-.98 2.34.99 2.72 1.13 2.91c.15.2 1.97 3.02 4.77 4.24.67.29 1.2.47 1.61.6.68.22 1.3.19 1.79.11.55-.08 1.76-.72 2.01-1.42.25-.7.25-1.3.18-1.42-.08-.12-.27-.2-.57-.35Z"/></svg>
+                        Hubungi Admin
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
+                        @csrf
+                        <button type="submit" class="px-5 py-2.5 bg-white text-red-500 hover:bg-red-500 hover:text-white border border-red-100 hover:border-red-500 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 shadow-sm hover:shadow-md hover:-translate-y-0.5 group">
+                            <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                            Keluar
+                        </button>
+                    </form>
+                </div>
             </div>
         </x-slot>
 
@@ -95,6 +115,69 @@
                     </div>
                 </div>
 
+                <div class="glass-panel rounded-[2rem] shadow-lg border border-slate-100 p-6 animate-slide-up" style="animation-delay: 80ms;">
+                    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-5 pb-4 border-b border-slate-100">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-900">Filter Laporan</h3>
+                            <p class="text-sm text-slate-500 font-medium mt-1">Saring laporan berdasarkan status, kategori, tanggal, atau kata kunci.</p>
+                        </div>
+                        <div class="text-sm font-bold text-slate-500">
+                            Menampilkan {{ count($pengaduans) }} laporan
+                        </div>
+                    </div>
+
+                    <form method="GET" action="{{ route('guru.dashboard') }}" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Cari</label>
+                            <input type="text" name="search" value="{{ $searchFilter }}" placeholder="Nama siswa, lokasi, atau isi tanggapan" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Status</label>
+                            <select name="status" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium">
+                                <option value="semua" {{ $statusFilter === 'semua' ? 'selected' : '' }}>Semua Status</option>
+                                <option value="Menunggu" {{ $statusFilter === 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
+                                <option value="Proses" {{ $statusFilter === 'Proses' ? 'selected' : '' }}>Proses</option>
+                                <option value="Selesai" {{ $statusFilter === 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Kategori</label>
+                            <select name="kategori_id" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium">
+                                <option value="">Semua Kategori</option>
+                                @foreach($kategoris as $kategori)
+                                    <option value="{{ $kategori->id }}" {{ (string) $kategoriFilter === (string) $kategori->id ? 'selected' : '' }}>
+                                        {{ $kategori->nama_kategori }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Tanggal</label>
+                            <input type="date" name="tanggal" value="{{ $tanggalFilter }}" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Urutkan</label>
+                            <select name="sort" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium">
+                                <option value="terbaru" {{ $sortFilter === 'terbaru' ? 'selected' : '' }}>Terbaru</option>
+                                <option value="terlama" {{ $sortFilter === 'terlama' ? 'selected' : '' }}>Terlama</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2 xl:col-span-5 flex flex-col sm:flex-row gap-3">
+                            <button type="submit" class="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-extrabold shadow-lg shadow-slate-900/10 transition-transform transform hover:-translate-y-0.5">
+                                Terapkan Filter
+                            </button>
+                            <a href="{{ route('guru.dashboard') }}" class="px-6 py-3.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl font-bold border border-slate-200 shadow-sm text-center">
+                                Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
                 <div class="glass-panel rounded-[2rem] shadow-lg border border-slate-100 overflow-hidden animate-slide-up" style="animation-delay: 100ms;">
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-sm text-left text-slate-600">
@@ -112,14 +195,14 @@
                                 <tr class="hover:bg-slate-50/80 transition duration-200 group">
                                     <td class="px-6 py-5 align-top">
                                         <button type="button" 
-                                                @click="profileModal = true; studentProfile = { 
-                                                    name: '{{ addslashes($item->user->name) }}', 
-                                                    nis: '{{ addslashes($item->user->nis_nip ?? '-') }}', 
-                                                    kelas: '{{ addslashes($item->user->kelas ?? '-') }}', 
-                                                    jurusan: '{{ addslashes($item->user->jurusan ?? 'Umum') }}', 
-                                                    hp: '{{ addslashes($item->user->no_telp ?? 'Tidak ada') }}',
-                                                    avatar: '{{ $item->user->avatar ? asset('storage/' . $item->user->avatar) : '' }}' 
-                                                }" 
+                                                @click='profileModal = true; studentProfile = @js([
+                                                    "name" => $item->user->name,
+                                                    "nis" => $item->user->nis_nip ?? "-",
+                                                    "kelas" => $item->user->kelas ?? "-",
+                                                    "jurusan" => $item->user->jurusan ?? "Umum",
+                                                    "hp" => $item->user->no_telp ?? "Tidak ada",
+                                                    "avatar" => $item->user->avatar ? asset("storage/" . $item->user->avatar) : ""
+                                                ])' 
                                                 class="font-extrabold text-indigo-600 hover:text-indigo-800 text-left flex items-center gap-2 transition-colors group-hover:translate-x-1 duration-300">
                                             <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xs shadow-inner">👤</div>
                                             <span class="hover:underline">{{ $item->user->name }}</span>
@@ -232,9 +315,22 @@
     @endif
 </td>
                                     <td class="px-6 py-5 text-center align-middle">
-                                        <button @click="openModal = true; selectedData = { id: '{{ $item->id }}', status: '{{ $item->status }}', feedback: '{{ addslashes($item->feedback) }}' }" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-lg shadow-indigo-500/30 transition transform hover:-translate-y-0.5 whitespace-nowrap flex items-center justify-center gap-1.5 mx-auto">
+                                        <button @click="openModal = true; selectedData = { id: '{{ $item->id }}', status: '{{ $item->status }}', feedback: '{{ addslashes($item->feedback ?? '') }}', feedback_foto: '{{ $item->feedback_foto ? asset('storage/' . $item->feedback_foto) : '' }}' }" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-lg shadow-indigo-500/30 transition transform hover:-translate-y-0.5 whitespace-nowrap flex items-center justify-center gap-1.5 mx-auto">
                                             ✏️ Tanggapi
                                         </button>
+                                        @if($item->feedback || $item->feedback_foto)
+                                            <div class="mt-3 flex flex-col items-center gap-2">
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-black rounded-full border border-emerald-200">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                    Balasan tersimpan
+                                                </span>
+                                                @if($item->feedback_foto)
+                                                    <a href="{{ asset('storage/' . $item->feedback_foto) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-600 text-[10px] font-bold rounded-xl border border-slate-200 transition">
+                                                        📷 Foto tanggapan
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </td>
                                 </tr>
                                 @empty
@@ -249,6 +345,17 @@
                             </tbody>
                         </table>
                     </div>
+
+                    @if($pengaduans->hasPages())
+                        <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                            <div class="text-sm text-slate-600 font-medium">
+                                Menampilkan <span class="font-bold">{{ $pengaduans->firstItem() }}</span> - <span class="font-bold">{{ $pengaduans->lastItem() }}</span> dari <span class="font-bold">{{ $pengaduans->total() }}</span> laporan
+                            </div>
+                            <div class="flex justify-center">
+                                {{ $pengaduans->links() }}
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
             </div>
@@ -260,7 +367,7 @@
             
             <div x-show="openModal" 
                  x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-8 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                 class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg relative z-10 overflow-hidden border border-slate-100">
+                 class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg relative z-10 overflow-y-auto max-h-[90vh] border border-slate-100">
                 
                 <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <div>
@@ -272,7 +379,7 @@
                     </button>
                 </div>
 
-                <form :action="'/guru/pengaduan/' + selectedData.id" method="POST" class="p-8 space-y-6">
+                <form :action="'/guru/pengaduan/' + selectedData.id" method="POST" enctype="multipart/form-data" class="p-8 space-y-6" @submit="return validateForm()">
                     @csrf 
                     @method('PUT')
                     
@@ -289,8 +396,21 @@
                         <label class="block text-sm font-extrabold text-slate-700 mb-2">Catatan / Pesan untuk Siswa</label>
                         <textarea name="feedback" x-model="selectedData.feedback" rows="4" placeholder="Ketikkan tindak lanjut yang telah dilakukan..." class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium text-slate-700 transition-shadow resize-none"></textarea>
                     </div>
+
+                    <div>
+                        <label class="block text-sm font-extrabold text-slate-700 mb-2">Foto Tanggapan <span class="text-slate-400 font-normal">(Opsional)</span></label>
+                        <input type="file" name="feedback_foto" accept="image/*" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 focus:outline-none transition-all">
+                        <p class="text-xs text-slate-500 mt-2 font-medium">* JPG, PNG, atau WEBP. Maksimal 3MB.</p>
+                    </div>
+
+                    <template x-if="selectedData.feedback_foto">
+                        <a :href="selectedData.feedback_foto" target="_blank" class="block rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+                            <img :src="selectedData.feedback_foto" alt="Foto tanggapan saat ini" class="w-full h-44 object-cover">
+                        </a>
+                    </template>
                     
                     <div class="pt-2">
+                        <p x-show="validationError" x-text="validationError" class="text-red-500 text-sm font-bold mb-3"></p>
                         <button type="submit" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-extrabold shadow-lg shadow-indigo-500/30 transition transform hover:-translate-y-0.5">
                             Simpan Pembaruan
                         </button>

@@ -30,6 +30,11 @@
     </style>
 
     @php
+        $adminWaNumber = '6282119096623';
+        $adminWaMessage = rawurlencode('Halo Admin SMK Mutiara, saya ingin melaporkan gangguan, kesalahan, atau respon yang lambat pada aplikasi pengaduan.');
+    @endphp
+
+    @php
         $kinerjaStatus = request('kinerja_status', 'semua');
         $kinerjaSort = request('kinerja_sort', 'terbaru');
         $kinerjaTanggal = request('kinerja_tanggal', '');
@@ -98,6 +103,10 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 Buat Laporan Baru
                             </button>
+                            <a href="https://wa.me/{{ $adminWaNumber }}?text={{ $adminWaMessage }}" target="_blank" class="w-full px-6 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-extrabold shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.52 3.48A11.8 11.8 0 0 0 12.01 0C5.43 0 .08 5.34.08 11.92c0 2.1.55 4.14 1.6 5.94L0 24l6.32-1.66a11.9 11.9 0 0 0 5.69 1.45h.01c6.57 0 11.91-5.34 11.91-11.92 0-3.18-1.24-6.17-3.41-8.39ZM12.01 21.5h-.01a9.6 9.6 0 0 1-4.89-1.34l-.35-.2-3.75.99.99-3.65-.23-.37a9.58 9.58 0 0 1-1.47-5.11c0-5.31 4.32-9.63 9.64-9.63 2.57 0 4.98 1 6.8 2.82a9.55 9.55 0 0 1 2.81 6.81c0 5.32-4.31 9.68-9.54 9.68Zm5.57-7.19c-.3-.15-1.76-.87-2.03-.97-.27-.1-.46-.15-.65.15s-.75.97-.92 1.17-.34.23-.63.08a8.03 8.03 0 0 1-2.37-1.46 8.94 8.94 0 0 1-1.65-2.05c-.17-.3-.02-.46.13-.61.13-.13.3-.34.45-.51.15-.17.2-.29.3-.49.1-.2.05-.38-.02-.53-.07-.15-.65-1.56-.9-2.14-.24-.57-.49-.49-.65-.5-.17-.01-.36-.01-.55-.01s-.5.07-.76.38-.98.96-.98 2.34.99 2.72 1.13 2.91c.15.2 1.97 3.02 4.77 4.24.67.29 1.2.47 1.61.6.68.22 1.3.19 1.79.11.55-.08 1.76-.72 2.01-1.42.25-.7.25-1.3.18-1.42-.08-.12-.27-.2-.57-.35Z"/></svg>
+                                Hubungi Admin
+                            </a>
                             <a href="{{ route('profile.edit') }}" class="w-full text-center px-6 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-bold shadow-sm hover:shadow-md transition-all">
                                 ⚙️ Edit Profil
                             </a>
@@ -280,8 +289,17 @@
                                                 {{ $isSelesai ? '👨‍🏫 Respon Guru/Petugas:' : '🔵 Laporan Sedang Diproses:' }}
                                             </h6>
                                             <p class="{{ $isSelesai ? 'text-green-700' : 'text-blue-700' }} text-sm leading-relaxed font-medium flex-1">
-                                                {{ $isSelesai ? (optional($post->tanggapan)->tanggapan ?? 'Laporan ini telah direspon dan sarpras terkait sudah selesai diperbaiki oleh tim sekolah.') : 'Laporan ini sedang diproses oleh tim sekolah. Semua murid bisa memantau progresnya di feed ini.' }}
+                                                @if($post->feedback)
+                                                    {{ $post->feedback }}
+                                                @else
+                                                    {{ $isSelesai ? 'Laporan ini telah direspon dan sarpras terkait sudah selesai diperbaiki oleh tim sekolah.' : 'Laporan ini sedang diproses oleh tim sekolah. Semua murid bisa memantau progresnya di feed ini.' }}
+                                                @endif
                                             </p>
+                                            @if($post->feedback_foto)
+                                                <a href="{{ asset('storage/' . $post->feedback_foto) }}" target="_blank" class="mt-3 block rounded-2xl overflow-hidden border {{ $isSelesai ? 'border-green-200' : 'border-blue-200' }} bg-white shadow-sm">
+                                                    <img src="{{ asset('storage/' . $post->feedback_foto) }}" alt="Foto tanggapan guru" class="w-full h-52 object-cover">
+                                                </a>
+                                            @endif
                                             <p class="{{ $isSelesai ? 'text-green-600 bg-green-100' : 'text-blue-600 bg-blue-100' }} text-[11px] font-black mt-4 flex items-center gap-1 w-max px-2 py-1 rounded-md">
                                                 {{ $isSelesai ? '✅ Selesai:' : '🔄 Diperbarui:' }} {{ $post->updated_at->format('d M Y') }}
                                             </p>
@@ -368,8 +386,13 @@
                     @endforelse
 
                     @if($laporanKinerja->hasPages())
-                        <div class="pt-4 flex justify-center">
-                            {{ $laporanKinerja->links() }}
+                        <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 glass-panel rounded-2xl border border-slate-100 p-5 shadow-sm">
+                            <div class="text-sm text-slate-600 font-medium">
+                                Menampilkan <span class="font-bold">{{ $laporanKinerja->firstItem() }}</span> - <span class="font-bold">{{ $laporanKinerja->lastItem() }}</span> dari <span class="font-bold">{{ $laporanKinerja->total() }}</span> laporan
+                            </div>
+                            <div class="flex justify-center">
+                                {{ $laporanKinerja->links() }}
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -407,6 +430,24 @@
                                         <span class="text-red-500 shrink-0">📍</span> <span class="line-clamp-1">{{ $item->lokasi }}</span>
                                     </h4>
                                     <p class="text-slate-500 text-sm mb-4 line-clamp-2 leading-relaxed font-medium">{{ $item->keterangan }}</p>
+                                    
+                                    @if($item->status != 'Menunggu' && ($item->feedback || $item->feedback_foto))
+                                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="text-blue-600 font-bold text-sm">💬 Respon Guru</span>
+                                                <span class="text-xs text-blue-500 font-medium">{{ $item->updated_at->diffForHumans() }}</span>
+                                            </div>
+                                            @if($item->feedback)
+                                                <p class="text-slate-700 text-sm font-medium leading-relaxed">{{ $item->feedback }}</p>
+                                            @endif
+                                            @if($item->feedback_foto)
+                                                <a href="{{ asset('storage/' . $item->feedback_foto) }}" target="_blank" class="inline-block mt-2">
+                                                    <img src="{{ asset('storage/' . $item->feedback_foto) }}" alt="Foto respon guru" class="w-20 h-20 object-cover rounded-lg border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+                                                </a>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    
                                     <div class="mt-auto pt-4 border-t border-slate-100">
                                         <span class="inline-flex items-center text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
                                             Kategori: {{ $item->kategori->nama_kategori ?? 'Umum' }}
