@@ -346,16 +346,14 @@
                         </table>
                     </div>
 
-                    @if($pengaduans->hasPages())
-                        <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-                            <div class="text-sm text-slate-600 font-medium">
-                                Menampilkan <span class="font-bold">{{ $pengaduans->firstItem() }}</span> - <span class="font-bold">{{ $pengaduans->lastItem() }}</span> dari <span class="font-bold">{{ $pengaduans->total() }}</span> laporan
-                            </div>
-                            <div class="flex justify-center">
-                                {{ $pengaduans->links() }}
-                            </div>
+                    <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="text-sm text-slate-600 font-medium">
+                            Menampilkan <span class="font-bold">{{ $pengaduans->firstItem() }}</span> - <span class="font-bold">{{ $pengaduans->lastItem() }}</span> dari <span class="font-bold">{{ $pengaduans->total() }}</span> laporan
                         </div>
-                    @endif
+                        <div class="flex justify-center w-full md:w-auto">
+                            {{ $pengaduans->links() }}
+                        </div>
+                    </div>
                 </div>
 
             </div>

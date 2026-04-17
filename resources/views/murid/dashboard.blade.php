@@ -385,16 +385,14 @@
                         </div>
                     @endforelse
 
-                    @if($laporanKinerja->hasPages())
-                        <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 glass-panel rounded-2xl border border-slate-100 p-5 shadow-sm">
-                            <div class="text-sm text-slate-600 font-medium">
-                                Menampilkan <span class="font-bold">{{ $laporanKinerja->firstItem() }}</span> - <span class="font-bold">{{ $laporanKinerja->lastItem() }}</span> dari <span class="font-bold">{{ $laporanKinerja->total() }}</span> laporan
-                            </div>
-                            <div class="flex justify-center">
-                                {{ $laporanKinerja->links() }}
-                            </div>
+                    <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 glass-panel rounded-2xl border border-slate-100 p-5 shadow-sm">
+                        <div class="text-sm text-slate-600 font-medium">
+                            Menampilkan <span class="font-bold">{{ $laporanKinerja->firstItem() }}</span> - <span class="font-bold">{{ $laporanKinerja->lastItem() }}</span> dari <span class="font-bold">{{ $laporanKinerja->total() }}</span> laporan
                         </div>
-                    @endif
+                        <div class="flex justify-center w-full sm:w-auto">
+                            {{ $laporanKinerja->links() }}
+                        </div>
+                    </div>
                 </div>
 
                 <div x-show="activeTab === 'laporanku'" 
