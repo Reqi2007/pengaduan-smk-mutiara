@@ -49,7 +49,7 @@ class SuperAdminController extends Controller
             default => $query->latest(),
         };
 
-        $users = $query->get();
+        $users = $query->paginate(20)->withQueryString();
         
         $resetRequests = PasswordResetRequest::with('user')
                             ->where('status', 'pending')
@@ -91,9 +91,7 @@ class SuperAdminController extends Controller
         if ($request->role === 'murid') {
             $rules['nis_nip'] = ['required', 'digits:8', 'unique:users,nis_nip'];
             $rules['kelas'] = ['required', 'in:10,11,12'];
-            $rules['jurusan'] = $request->kelas === '12'
-                ? ['required', 'in:RPL,MPLB,AKL,TKR']
-                : ['nullable', 'in:RPL,MPLB,AKL,TKR'];
+            $rules['jurusan'] = ['required', 'in:RPL,MPLB,AKL,TKR'];
         } else {
             $rules['nis_nip'] = ['required', 'digits:10', 'unique:users,nis_nip'];
             $rules['kelas'] = ['nullable', 'in:10,11,12'];
@@ -103,7 +101,7 @@ class SuperAdminController extends Controller
         $validated = $request->validate($rules);
 
         $kelasValue = $validated['role'] === 'murid' ? $validated['kelas'] : null;
-        $jurusanValue = $validated['role'] === 'murid' && $validated['kelas'] === '12'
+        $jurusanValue = $validated['role'] === 'murid'
             ? ($validated['jurusan'] ?? null)
             : null;
 
@@ -135,9 +133,7 @@ class SuperAdminController extends Controller
         if ($request->role === 'murid') {
             $rules['nis_nip'] = ['required', 'digits:8', Rule::unique('users', 'nis_nip')->ignore($user->id)];
             $rules['kelas'] = ['required', 'in:10,11,12'];
-            $rules['jurusan'] = $request->kelas === '12'
-                ? ['required', 'in:RPL,MPLB,AKL,TKR']
-                : ['nullable', 'in:RPL,MPLB,AKL,TKR'];
+            $rules['jurusan'] = ['required', 'in:RPL,MPLB,AKL,TKR'];
         } else {
             $rules['nis_nip'] = ['required', 'digits:10', Rule::unique('users', 'nis_nip')->ignore($user->id)];
             $rules['kelas'] = ['nullable', 'in:10,11,12'];
@@ -151,7 +147,7 @@ class SuperAdminController extends Controller
         $validated = $request->validate($rules);
 
         $kelasValue = $validated['role'] === 'murid' ? $validated['kelas'] : null;
-        $jurusanValue = $validated['role'] === 'murid' && $validated['kelas'] === '12'
+        $jurusanValue = $validated['role'] === 'murid'
             ? ($validated['jurusan'] ?? null)
             : null;
 

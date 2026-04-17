@@ -394,6 +394,7 @@
                                     @endforelse
                                 </tbody>
                             </table>
+                            
                         </div>
 
                         {{-- TAB: DATA SISWA --}}
@@ -551,8 +552,31 @@
                                     @endforelse
                                 </tbody>
                             </table>
+                            
                         </div>
+<div class="mt-6 px-4 py-4 bg-white border-t border-slate-100">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <p class="text-sm text-slate-500 font-medium italic">
+            Menampilkan {{ $users->firstItem() }} - {{ $users->lastItem() }} dari {{ $users->total() }} akun
+        </p>
+        
+        <div class="pagination-links">
+            {{ $users->links() }}
+        </div>
+    </div>
+</div>
 
+<style>
+    /* Agar tampilan tombol pagination Laravel (Tailwind) pas dengan desain dashboard */
+    .pagination-links nav div:first-child { display: none; } 
+    .pagination-links nav a, .pagination-links nav span {
+        padding: 8px 14px !important;
+        border-radius: 10px !important;
+        margin: 0 2px;
+        font-weight: 600;
+        font-size: 13px;
+    }
+</style>
                     </div>
                 </div>
             </div>
@@ -617,16 +641,16 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5" x-show="roleMode === 'murid'" x-transition x-cloak>
                             <div>
                                 <label class="block text-sm font-extrabold text-slate-700 mb-2">Kelas</label>
-                                <select name="kelas" x-model="studentClass" @change="if (studentClass !== '12') studentJurusan = ''" x-bind:required="roleMode === 'murid'" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow cursor-pointer">
+                                <select name="kelas" x-model="studentClass" x-bind:required="roleMode === 'murid'" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow cursor-pointer">
                                     <option value="" disabled selected>-- Pilih Kelas --</option>
                                     <option value="10">Kelas 10 (X)</option>
                                     <option value="11">Kelas 11 (XI)</option>
                                     <option value="12">Kelas 12 (XII)</option>
                                 </select>
                             </div>
-                            <div x-show="studentClass === '12'" x-transition x-cloak>
+                            <div>
                                 <label class="block text-sm font-extrabold text-slate-700 mb-2">Jurusan</label>
-                                <select name="jurusan" x-model="studentJurusan" x-bind:required="studentClass === '12'" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow cursor-pointer">
+                                <select name="jurusan" x-model="studentJurusan" x-bind:required="roleMode === 'murid'" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow cursor-pointer">
                                     <option value="" disabled selected>-- Pilih Jurusan --</option>
                                     <option value="RPL">RPL</option>
                                     <option value="MPLB">MPLB</option>
@@ -713,16 +737,16 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5" x-show="editRoleMode === 'murid'" x-transition x-cloak>
                             <div>
                                 <label class="block text-sm font-extrabold text-slate-700 mb-2">Kelas</label>
-                                <select name="kelas" x-model="editStudentClass" @change="if (editStudentClass !== '12') editStudentJurusan = ''" x-bind:required="editRoleMode === 'murid'" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow cursor-pointer">
+                                <select name="kelas" x-model="editStudentClass" x-bind:required="editRoleMode === 'murid'" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow cursor-pointer">
                                     <option value="" disabled>-- Pilih Kelas --</option>
                                     <option value="10">Kelas 10 (X)</option>
                                     <option value="11">Kelas 11 (XI)</option>
                                     <option value="12">Kelas 12 (XII)</option>
                                 </select>
                             </div>
-                            <div x-show="editStudentClass === '12'" x-transition x-cloak>
+                            <div>
                                 <label class="block text-sm font-extrabold text-slate-700 mb-2">Jurusan</label>
-                                <select name="jurusan" x-model="editStudentJurusan" x-bind:required="editStudentClass === '12'" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow cursor-pointer">
+                                <select name="jurusan" x-model="editStudentJurusan" x-bind:required="editRoleMode === 'murid'" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow cursor-pointer">
                                     <option value="" disabled>-- Pilih Jurusan --</option>
                                     <option value="RPL">RPL</option>
                                     <option value="MPLB">MPLB</option>
