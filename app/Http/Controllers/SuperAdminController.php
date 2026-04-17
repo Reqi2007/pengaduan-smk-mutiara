@@ -202,41 +202,65 @@ class SuperAdminController extends Controller
     // 6. Cetak Laporan PDF
     public function laporan(Request $request)
     {
+        // 1. Validasi input filter termasuk search dan status
         $filters = $request->validate([
-            'kategori_id' => ['nullable', 'exists:kategoris,id'],
-            'tanggal_awal' => ['nullable', 'date'],
-            'tanggal_akhir' => ['nullable', 'date'],
+            'search'        => ['nullable', 'string', 'max:255'],
+            'kategori_id'   => ['nullable', 'exists:kategoris,id'],
+            'status'        => ['nullable', 'string'],
+            'tanggal_awal'  => ['nullable', 'date'],
+            'tanggal_akhir' => ['nullable', 'date', 'after_or_equal:tanggal_awal'], // Mencegah tanggal akhir lebih kecil
         ]);
 
-        $kategoriId = $filters['kategori_id'] ?? null;
-        $tanggalAwal = $filters['tanggal_awal'] ?? null;
+        $search       = $filters['search'] ?? null;
+        $kategoriId   = $filters['kategori_id'] ?? null;
+        $status       = $filters['status'] ?? null;
+        $tanggalAwal  = $filters['tanggal_awal'] ?? null;
         $tanggalAkhir = $filters['tanggal_akhir'] ?? null;
 
+        // 2. Query dasar (Eager Loading untuk performa)
         $pengaduanQuery = Pengaduan::with(['user', 'kategori'])->latest();
 
+        // 3. Terapkan Filter Pencarian (Nama Pelapor atau Keterangan Laporan)
+        if ($search) {
+            $pengaduanQuery->where(function ($q) use ($search) {
+                $q->where('keterangan', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                                ->orWhere('nis_nip', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // 4. Terapkan Filter Kategori
         if ($kategoriId) {
             $pengaduanQuery->where('kategori_id', $kategoriId);
         }
 
+        // 5. Terapkan Filter Status
+        if ($status) {
+            $pengaduanQuery->where('status', $status);
+        }
+
+        // 6. Terapkan Filter Tanggal Awal
         if ($tanggalAwal) {
             $pengaduanQuery->whereDate('created_at', '>=', $tanggalAwal);
         }
 
+        // 7. Terapkan Filter Tanggal Akhir
         if ($tanggalAkhir) {
             $pengaduanQuery->whereDate('created_at', '<=', $tanggalAkhir);
         }
 
+        // 8. Eksekusi Query
         $pengaduans = $pengaduanQuery->get();
         $kategoris = Kategori::orderBy('nama_kategori')->get();
 
+        // 9. Kirim data ke View
         return view('superadmin.laporan', [
             'pengaduans' => $pengaduans,
-            'kategoris' => $kategoris,
-            'filters' => [
-                'kategori_id' => $kategoriId,
-                'tanggal_awal' => $tanggalAwal,
-                'tanggal_akhir' => $tanggalAkhir,
-            ],
+            'kategoris'  => $kategoris,
+            // Kita pass kembali $request->all() agar filter tetap bertahan di input UI
+            'filters'    => $request->all() 
         ]);
     }
 }
