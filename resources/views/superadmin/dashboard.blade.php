@@ -51,9 +51,9 @@
                     kelas: user.kelas ?? '',
                     jurusan: user.jurusan ?? ''
                 };
-                this.editRoleMode = this.editingUser.role;
-                this.editStudentClass = this.editingUser.kelas ?? '';
-                this.editStudentJurusan = this.editingUser.jurusan ?? '';
+                this.editRoleMode = this.editingUser.role ?? 'murid';
+                this.editStudentClass = (this.editingUser.kelas ?? '').toString();
+                this.editStudentJurusan = (this.editingUser.jurusan ?? '').toString();
                 this.editModal = true;
             },
             sanitizeIdentity(event, role) {
@@ -70,7 +70,7 @@
         <x-slot name="header">
             <div class="flex justify-between items-center w-full relative z-10">
                 <h2 class="font-extrabold text-2xl text-slate-800 flex items-center gap-3 tracking-tight">
-                    <span class="bg-gradient-to-br from-slate-700 to-slate-900 text-white p-2.5 rounded-xl shadow-lg shadow-slate-900/30 text-base transform hover:scale-110 transition duration-300">ðŸ›¡ï¸</span> 
+                    <span class="bg-gradient-to-br from-slate-700 to-slate-900 text-white p-2.5 rounded-xl shadow-lg shadow-slate-900/30 text-base transform hover:scale-110 transition duration-300">🛡️</span> 
                     Pusat Kendali Admin
                 </h2>
 
@@ -91,7 +91,7 @@
                 @if(session('success'))
                     <div x-data="{ show: true }" x-show="show" x-transition.opacity.duration.500ms x-init="setTimeout(() => show = false, 7000)" class="animate-slide-up bg-white border-l-4 border-green-500 px-6 py-4 rounded-2xl shadow-xl shadow-green-500/10 flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl shadow-inner">âœ…</div>
+                            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl shadow-inner">✅</div>
                             <span class="font-bold text-slate-800">{{ session('success') }}</span>
                         </div>
                         <button @click="show = false" class="text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
@@ -102,7 +102,7 @@
                 @if ($errors->any())
                     <div class="animate-slide-up bg-white border-l-4 border-red-500 text-slate-700 px-6 py-4 rounded-2xl shadow-xl shadow-red-500/10">
                         <div class="flex items-center gap-3 mb-2">
-                            <div class="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-lg shadow-inner">âš ï¸</div>
+                            <div class="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-lg shadow-inner">⚠️</div>
                             <p class="font-extrabold text-slate-800 text-lg">Gagal Memproses Data:</p>
                         </div>
                         <ul class="list-disc pl-14 font-semibold text-sm text-red-600 space-y-1">
@@ -113,7 +113,7 @@
                     </div>
                 @endif
 
-                {{-- 1. BAGIAN PERMOHONAN RESET SANDI (KEMBALI SEPERTI SEMULA) --}}
+                {{-- 1. BAGIAN PERMOHONAN RESET SANDI --}}
                 <div class="glass-panel rounded-[2rem] shadow-xl shadow-slate-900/5 p-6 border border-white relative overflow-hidden animate-slide-up" style="animation-delay: 100ms;">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-amber-400/20 rounded-bl-full blur-2xl -z-10"></div>
 
@@ -156,7 +156,7 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                                            â±ï¸ {{ $request->created_at->diffForHumans() }}
+                                            ⏳ {{ $request->created_at->diffForHumans() }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 flex justify-center gap-2">
@@ -177,7 +177,7 @@
                                 @empty
                                 <tr>
                                     <td colspan="3" class="px-6 py-12 text-center text-slate-400 font-medium">
-                                        <div class="text-4xl mb-3 opacity-50">âœ¨</div>
+                                        <div class="text-4xl mb-3 opacity-50">✨</div>
                                         Tidak ada permohonan reset sandi saat ini.
                                     </td>
                                 </tr>
@@ -187,7 +187,7 @@
                     </div>
                 </div>
 
-                {{-- 2. BAGIAN MANAJEMEN PENGGUNA (TAB MURID & GURU) --}}
+                {{-- 2. BAGIAN MANAJEMEN PENGGUNA --}}
                 <div class="animate-slide-up" style="animation-delay: 200ms;">
                     
                     {{-- HEADER DAN TOMBOL AKSI --}}
@@ -203,7 +203,7 @@
                         </div>
                         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
                             <a href="{{ route('superadmin.laporan') }}" target="_blank" class="flex-1 md:flex-none justify-center px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 rounded-xl font-extrabold shadow-sm hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2 group">
-                                <span class="group-hover:-translate-y-0.5 transition-transform">ðŸ–¨ï¸</span> Cetak PDF
+                                <span class="group-hover:-translate-y-0.5 transition-transform">🖨️</span> Cetak PDF
                             </a>
                             <button @click="openModal = true; roleMode = 'murid'; studentClass = ''; studentJurusan = ''" class="flex-1 md:flex-none justify-center px-6 py-3 bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-xl font-extrabold shadow-lg shadow-slate-900/20 hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -215,7 +215,7 @@
                     {{-- KOTAK DAFTAR AKUN --}}
                     <div class="bg-white/90 backdrop-blur-md border border-slate-200 rounded-3xl shadow-sm overflow-hidden mt-6">
                         
-                                                {{-- NAVIGASI TAB --}}
+                        {{-- NAVIGASI TAB --}}
                         <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50 flex flex-col gap-4">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
@@ -260,7 +260,7 @@
                                     <input type="hidden" name="view" :value="activeTab">
                                     <div>
                                         <label class="block text-xs font-extrabold text-slate-600 mb-2 uppercase tracking-wider">Urutkan</label>
-                                <select name="sort" onchange="this.form.submit()" class="w-full lg:w-60 px-4 py-3 bg-white border border-slate-200 rounded-xl font-semibold text-slate-700 shadow-sm focus:ring-2 focus:ring-slate-800 focus:border-slate-800">
+                                        <select name="sort" onchange="this.form.submit()" class="w-full lg:w-60 px-4 py-3 bg-white border border-slate-200 rounded-xl font-semibold text-slate-700 shadow-sm focus:ring-2 focus:ring-slate-800 focus:border-slate-800">
                                             <option value="terbaru" {{ $sort === 'terbaru' ? 'selected' : '' }}>Terbaru</option>
                                             <option value="terlama" {{ $sort === 'terlama' ? 'selected' : '' }}>Terlama</option>
                                             <option value="nama_asc" {{ $sort === 'nama_asc' ? 'selected' : '' }}>Nama A-Z</option>
@@ -558,7 +558,7 @@
             </div>
         </div>
 
-        {{-- 3. MODAL TAMBAH AKUN BARU (KEMBALI SEPERTI SEMULA) --}}
+        {{-- 3. MODAL TAMBAH AKUN BARU --}}
         <div x-cloak x-show="openModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <div x-show="openModal" x-transition.opacity.duration.300ms class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="openModal = false"></div>
             
@@ -652,6 +652,7 @@
             </div>
         </div>
 
+        {{-- 4. MODAL EDIT INFO AKUN --}}
         <div x-cloak x-show="editModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <div x-show="editModal" x-transition.opacity.duration.300ms class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="editModal = false"></div>
 
@@ -671,7 +672,7 @@
                 </div>
 
                 <div class="p-8 overflow-y-auto custom-scrollbar">
-                    <form :action="'{{ url('/superadmin/users') }}/' + editingUser.id" method="POST" class="space-y-6">
+                    <form :action="`{{ url('/superadmin/users') }}/${editingUser.id}`" method="POST" class="space-y-6">
                         @csrf
                         @method('PATCH')
 
@@ -688,7 +689,7 @@
 
                             <div>
                                 <label class="block text-sm font-extrabold text-slate-700 mb-2">Peran Akses (Role)</label>
-                                <select name="role" x-model="editingUser.role" @change="editRoleMode = editingUser.role; if (editRoleMode !== 'murid') { editStudentClass = ''; editStudentJurusan = ''; }" required class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow appearance-none cursor-pointer">
+                                <select name="role" x-model="editRoleMode" @change="if (editRoleMode !== 'murid') { editStudentClass = ''; editStudentJurusan = ''; }" required class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-800 focus:border-slate-800 font-bold text-slate-700 transition-shadow appearance-none cursor-pointer">
                                     <option value="murid">Siswa</option>
                                     <option value="guru">Guru / Staff</option>
                                 </select>
@@ -737,11 +738,13 @@
                         </div>
 
                         <div class="pt-4 mt-6 border-t border-slate-100 flex justify-end gap-3">
-                            <button type="button" @click="editModal = false" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors">Batal</button>
-                            <button type="submit" class="px-8 py-3.5 bg-gradient-to-r from-blue-700 to-slate-900 hover:from-blue-800 hover:to-black text-white rounded-xl font-extrabold shadow-lg shadow-slate-900/20 transition transform hover:-translate-y-0.5 flex items-center gap-2">
-                                Simpan Perubahan
-                            </button>
-                        </div>
+    <button type="button" @click="editModal = false" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors">Batal</button>
+    
+    {{-- Menggunakan warna biru solid yang lebih aman agar tidak ter-purge oleh Tailwind --}}
+    <button type="submit" class="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-extrabold shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+        Simpan Perubahan
+    </button>
+</div>
                     </form>
                 </div>
             </div>
@@ -749,6 +752,3 @@
 
     </div>
 </x-app-layout>
-
-
-
