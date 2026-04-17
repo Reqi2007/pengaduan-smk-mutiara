@@ -29,6 +29,12 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 
+    @php
+        $kinerjaStatus = request('kinerja_status', 'semua');
+        $kinerjaSort = request('kinerja_sort', 'terbaru');
+        $kinerjaTanggal = request('kinerja_tanggal', '');
+    @endphp
+
     <div x-data="{ 
         activeTab: 'kinerja', 
         openModal: false, 
@@ -150,11 +156,61 @@
                 <div x-show="activeTab === 'kinerja'" 
                      x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
                      class="space-y-4 max-w-5xl mx-auto">
+
+                    <div class="glass-panel rounded-[2rem] p-5 sm:p-6 shadow-sm border border-slate-100">
+                        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 pb-5 mb-5 border-b border-slate-100">
+                            <div>
+                                <h3 class="text-xl font-black text-slate-900">Feed Kinerja Publik</h3>
+                                <p class="text-sm text-slate-500 font-medium mt-1">Laporan berstatus <span class="font-black text-blue-600">Proses</span> dan <span class="font-black text-green-600">Selesai</span> dapat dilihat seluruh murid.</p>
+                            </div>
+                            <div class="text-sm font-bold text-slate-500">
+                                @if($laporanKinerja->total())
+                                    Menampilkan {{ $laporanKinerja->firstItem() }}-{{ $laporanKinerja->lastItem() }} dari {{ $laporanKinerja->total() }} laporan
+                                @else
+                                    Tidak ada laporan yang cocok dengan filter saat ini.
+                                @endif
+                            </div>
+                        </div>
+
+                        <form method="GET" action="{{ route('murid.dashboard') }}" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-end">
+                            <div>
+                                <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Status Feed</label>
+                                <select name="kinerja_status" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-medium">
+                                    <option value="semua" {{ $kinerjaStatus === 'semua' ? 'selected' : '' }}>Semua Status</option>
+                                    <option value="Proses" {{ $kinerjaStatus === 'Proses' ? 'selected' : '' }}>Sedang Diproses</option>
+                                    <option value="Selesai" {{ $kinerjaStatus === 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Urutkan</label>
+                                <select name="kinerja_sort" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-medium">
+                                    <option value="terbaru" {{ $kinerjaSort === 'terbaru' ? 'selected' : '' }}>Terbaru</option>
+                                    <option value="terlama" {{ $kinerjaSort === 'terlama' ? 'selected' : '' }}>Terlama</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Tanggal Tertentu</label>
+                                <input type="date" name="kinerja_tanggal" value="{{ $kinerjaTanggal }}" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-medium">
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row gap-3 xl:justify-end">
+                                <button type="submit" class="w-full sm:w-auto px-5 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-extrabold shadow-lg shadow-slate-900/15 transition-transform transform hover:-translate-y-0.5">
+                                    Terapkan
+                                </button>
+                                <a href="{{ route('murid.dashboard') }}" class="w-full sm:w-auto px-5 py-3.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl font-bold border border-slate-200 shadow-sm text-center">
+                                    Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                     
-                    @forelse($laporanSelesai as $post)
+                    @forelse($laporanKinerja as $post)
                         @php
                             $avgRating = $post->ulasans->avg('rating');
                             $reviewCount = $post->ulasans->count();
+                            $isSelesai = $post->status === 'Selesai';
                         @endphp
                         
                         <div x-data="{ expanded: false }" class="glass-panel rounded-3xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300" :class="expanded ? 'ring-2 ring-blue-500/40 shadow-xl shadow-blue-900/10 my-6' : 'hover:shadow-md'">
@@ -164,22 +220,30 @@
                                     <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 transition-transform duration-500 shadow-sm border border-slate-100 bg-white" :class="expanded ? 'rotate-[-15deg] scale-110' : ''">🗂️</div>
                                     <div>
                                         <h4 class="text-lg font-extrabold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{{ $post->lokasi }}</h4>
-                                        <p class="text-sm font-semibold text-slate-500 mt-0.5 flex items-center gap-2">
+                                        <p class="text-sm font-semibold text-slate-500 mt-0.5 flex items-center gap-2 flex-wrap">
                                             <span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider border border-indigo-100">{{ $post->kategori->nama_kategori ?? 'Umum' }}</span>
-                                            <span>•</span> Oleh: {{ $post->user->name }}
+                                            <span>•</span>
+                                            <span>Oleh: {{ $post->user->name }}</span>
                                         </p>
                                     </div>
                                 </div>
                                 
                                 <div class="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0">
-                                    <div class="text-right flex flex-col sm:items-end">
-                                        @if($reviewCount > 0)
-                                            <div class="flex items-center gap-1.5 text-amber-400 text-xl drop-shadow-sm">
-                                                ★ <span class="text-slate-800 font-black text-lg ml-0.5">{{ number_format($avgRating, 1) }}</span>
-                                            </div>
-                                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{{ $reviewCount }} Ulasan Siswa</p>
+                                    <div class="text-right flex flex-col sm:items-end gap-2">
+                                        <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider border shadow-sm w-max {{ $isSelesai ? 'bg-green-100 text-green-700 border-green-200' : 'bg-blue-100 text-blue-700 border-blue-200' }}">
+                                            {{ $isSelesai ? 'Selesai' : 'Sedang Diproses' }}
+                                        </span>
+                                        @if($isSelesai)
+                                            @if($reviewCount > 0)
+                                                <div class="flex items-center gap-1.5 text-amber-400 text-xl drop-shadow-sm">
+                                                    ★ <span class="text-slate-800 font-black text-lg ml-0.5">{{ number_format($avgRating, 1) }}</span>
+                                                </div>
+                                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{{ $reviewCount }} Ulasan Siswa</p>
+                                            @else
+                                                <div class="text-slate-400 font-bold text-sm bg-slate-100 px-3 py-1 rounded-full border border-slate-200">Belum ada nilai</div>
+                                            @endif
                                         @else
-                                            <div class="text-slate-400 font-bold text-sm bg-slate-100 px-3 py-1 rounded-full border border-slate-200">Belum ada nilai</div>
+                                            <div class="text-blue-600 font-bold text-sm bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Pantau progresnya di sini</div>
                                         @endif
                                     </div>
                                     <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 transform transition-transform duration-500" :class="expanded ? 'rotate-180 bg-blue-600 text-white shadow-md' : ''">
@@ -207,83 +271,107 @@
 
                                     <div class="space-y-4 flex flex-col h-full">
                                         <h5 class="text-[11px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
-                                            <span class="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse"></span> Tindak Lanjut Sekolah
+                                            <span class="w-2.5 h-2.5 rounded-full {{ $isSelesai ? 'bg-green-400' : 'bg-blue-400' }} animate-pulse"></span>
+                                            {{ $isSelesai ? 'Tindak Lanjut Sekolah' : 'Status Perkembangan' }}
                                         </h5>
-                                        <div class="bg-green-50 p-5 rounded-2xl border border-green-200 flex-1 flex flex-col relative overflow-hidden shadow-sm">
+                                        <div class="{{ $isSelesai ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200' }} p-5 rounded-2xl border flex-1 flex flex-col relative overflow-hidden shadow-sm">
                                             <div class="absolute -bottom-4 -right-4 text-7xl opacity-10">🛠️</div>
-                                            <h6 class="font-extrabold text-green-800 mb-2 text-sm flex items-center gap-2">👨‍🏫 Respon Guru/Petugas:</h6>
-                                            <p class="text-sm text-green-700 leading-relaxed font-medium flex-1">
-                                                {{ optional($post->tanggapan)->tanggapan ?? 'Laporan ini telah direspon dan sarpras terkait sudah selesai diperbaiki oleh tim sekolah.' }}
+                                            <h6 class="{{ $isSelesai ? 'text-green-800' : 'text-blue-800' }} font-extrabold mb-2 text-sm flex items-center gap-2">
+                                                {{ $isSelesai ? '👨‍🏫 Respon Guru/Petugas:' : '🔵 Laporan Sedang Diproses:' }}
+                                            </h6>
+                                            <p class="{{ $isSelesai ? 'text-green-700' : 'text-blue-700' }} text-sm leading-relaxed font-medium flex-1">
+                                                {{ $isSelesai ? (optional($post->tanggapan)->tanggapan ?? 'Laporan ini telah direspon dan sarpras terkait sudah selesai diperbaiki oleh tim sekolah.') : 'Laporan ini sedang diproses oleh tim sekolah. Semua murid bisa memantau progresnya di feed ini.' }}
                                             </p>
-                                            <p class="text-[11px] text-green-600 font-black mt-4 flex items-center gap-1 bg-green-100 w-max px-2 py-1 rounded-md">
-                                                ✅ Selesai: {{ $post->updated_at->format('d M Y') }}
+                                            <p class="{{ $isSelesai ? 'text-green-600 bg-green-100' : 'text-blue-600 bg-blue-100' }} text-[11px] font-black mt-4 flex items-center gap-1 w-max px-2 py-1 rounded-md">
+                                                {{ $isSelesai ? '✅ Selesai:' : '🔄 Diperbarui:' }} {{ $post->updated_at->format('d M Y') }}
                                             </p>
                                         </div>
                                         
-                                        @php $myReview = $post->ulasans->where('user_id', Auth::id())->first(); @endphp
-                                        @if(!$myReview)
-                                            <button @click="rateModal = true; rateData.pengaduan_id = '{{ $post->id }}'; rateData.rating = 0; rateData.komentar = ''" class="w-full py-4 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white rounded-2xl font-extrabold shadow-lg shadow-amber-500/30 transition-all transform hover:-translate-y-1 flex justify-center items-center gap-2">
-                                                <span class="text-2xl drop-shadow-md">⭐</span> Beri Nilai Perbaikan Ini
-                                            </button>
+                                        @if($isSelesai)
+                                            @php $myReview = $post->ulasans->where('user_id', Auth::id())->first(); @endphp
+                                            @if(!$myReview)
+                                                <button @click="rateModal = true; rateData.pengaduan_id = '{{ $post->id }}'; rateData.rating = 0; rateData.komentar = ''" class="w-full py-4 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white rounded-2xl font-extrabold shadow-lg shadow-amber-500/30 transition-all transform hover:-translate-y-1 flex justify-center items-center gap-2">
+                                                    <span class="text-2xl drop-shadow-md">⭐</span> Beri Nilai Perbaikan Ini
+                                                </button>
+                                            @else
+                                                <div class="w-full py-3 bg-slate-100 text-slate-500 rounded-2xl font-bold border border-slate-200 flex justify-center items-center gap-2">
+                                                    ✔️ Kamu sudah memberikan nilai
+                                                </div>
+                                            @endif
                                         @else
-                                            <div class="w-full py-3 bg-slate-100 text-slate-500 rounded-2xl font-bold border border-slate-200 flex justify-center items-center gap-2">
-                                                ✔️ Kamu sudah memberikan nilai
+                                            <div class="w-full py-4 bg-blue-50 text-blue-700 rounded-2xl font-extrabold border border-blue-100 flex justify-center items-center gap-2">
+                                                🔒 Ulasan tersedia setelah laporan selesai
                                             </div>
                                         @endif
                                     </div>
                                 </div>
 
-                                <div class="bg-slate-100/50 border-t border-slate-200 p-6">
-                                    <h5 class="text-sm font-black text-slate-800 mb-4 flex items-center justify-between">
-                                        <span class="flex items-center gap-2">💬 Ulasan & Komentar Siswa Lain</span>
-                                    </h5>
-                                    
-                                    <div class="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-3">
-                                        @forelse($post->ulasans as $ulasan)
-                                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex gap-4 transition hover:shadow-md relative">
-                                                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-black text-sm border border-slate-200 flex-shrink-0">
-                                                    {{ substr($ulasan->user->name, 0, 1) }}
-                                                </div>
-                                                <div class="flex-1">
-                                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-0">
-                                                        <div>
-                                                            <p class="text-sm font-extrabold text-slate-900">{{ $ulasan->user->name }} <span class="text-[11px] font-semibold text-slate-400 ml-2">{{ $ulasan->created_at->diffForHumans() }}</span></p>
-                                                            <div class="flex text-amber-400 text-sm mt-0.5 mb-2 tracking-widest drop-shadow-sm">
-                                                                @for($i=0; $i<$ulasan->rating; $i++) ★ @endfor
-                                                                @for($i=$ulasan->rating; $i<5; $i++) <span class="text-slate-200">★</span> @endfor
-                                                            </div>
-                                                        </div>
-                                                        @if($ulasan->user_id == Auth::id())
-                                                            <div class="flex items-center gap-3 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 absolute right-4 top-4 sm:relative sm:right-auto sm:top-auto">
-                                                                <button @click="editRateModal = true; editRateData = { id: '{{ $ulasan->id }}', rating: {{ $ulasan->rating }}, komentar: '{{ addslashes($ulasan->komentar) }}' }" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">✏️ Edit</button>
-                                                                <div class="w-px h-3 bg-slate-300"></div>
-                                                                <form action="{{ route('murid.ulasan.destroy', $ulasan->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus ulasan ini?');" class="inline m-0 p-0">
-                                                                    @csrf @method('DELETE')
-                                                                    <button type="submit" class="text-xs text-red-500 hover:text-red-700 font-bold flex items-center gap-1">🗑️</button>
-                                                                </form>
-                                                            </div>
-                                                        @endif
+                                @if($isSelesai)
+                                    <div class="bg-slate-100/50 border-t border-slate-200 p-6">
+                                        <h5 class="text-sm font-black text-slate-800 mb-4 flex items-center justify-between">
+                                            <span class="flex items-center gap-2">💬 Ulasan & Komentar Siswa Lain</span>
+                                        </h5>
+                                        
+                                        <div class="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-3">
+                                            @forelse($post->ulasans as $ulasan)
+                                                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex gap-4 transition hover:shadow-md relative">
+                                                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-black text-sm border border-slate-200 flex-shrink-0">
+                                                        {{ substr($ulasan->user->name, 0, 1) }}
                                                     </div>
-                                                    <p class="text-sm text-slate-700 font-medium italic mt-1 bg-slate-50 p-3 rounded-xl border border-slate-100/50">"{{ $ulasan->komentar }}"</p>
+                                                    <div class="flex-1">
+                                                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-0">
+                                                            <div>
+                                                                <p class="text-sm font-extrabold text-slate-900">{{ $ulasan->user->name }} <span class="text-[11px] font-semibold text-slate-400 ml-2">{{ $ulasan->created_at->diffForHumans() }}</span></p>
+                                                                <div class="flex text-amber-400 text-sm mt-0.5 mb-2 tracking-widest drop-shadow-sm">
+                                                                    @for($i=0; $i<$ulasan->rating; $i++) ★ @endfor
+                                                                    @for($i=$ulasan->rating; $i<5; $i++) <span class="text-slate-200">★</span> @endfor
+                                                                </div>
+                                                            </div>
+                                                            @if($ulasan->user_id == Auth::id())
+                                                                <div class="flex items-center gap-3 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 absolute right-4 top-4 sm:relative sm:right-auto sm:top-auto">
+                                                                    <button @click="editRateModal = true; editRateData = { id: '{{ $ulasan->id }}', rating: {{ $ulasan->rating }}, komentar: '{{ addslashes($ulasan->komentar) }}' }" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">✏️ Edit</button>
+                                                                    <div class="w-px h-3 bg-slate-300"></div>
+                                                                    <form action="{{ route('murid.ulasan.destroy', $ulasan->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus ulasan ini?');" class="inline m-0 p-0">
+                                                                        @csrf @method('DELETE')
+                                                                        <button type="submit" class="text-xs text-red-500 hover:text-red-700 font-bold flex items-center gap-1">🗑️</button>
+                                                                    </form>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                        <p class="text-sm text-slate-700 font-medium italic mt-1 bg-slate-50 p-3 rounded-xl border border-slate-100/50">"{{ $ulasan->komentar }}"</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        @empty
-                                            <div class="text-center py-8 bg-white/50 border-2 border-dashed border-slate-200 rounded-2xl">
-                                                <span class="text-4xl block mb-2 opacity-60">✍️</span>
-                                                <p class="text-sm text-slate-500 font-bold">Belum ada siswa yang memberikan ulasan.</p>
-                                            </div>
-                                        @endforelse
+                                            @empty
+                                                <div class="text-center py-8 bg-white/50 border-2 border-dashed border-slate-200 rounded-2xl">
+                                                    <span class="text-4xl block mb-2 opacity-60">✍️</span>
+                                                    <p class="text-sm text-slate-500 font-bold">Belum ada siswa yang memberikan ulasan.</p>
+                                                </div>
+                                            @endforelse
+                                        </div>
                                     </div>
-                                </div>
+                                @else
+                                    <div class="bg-slate-100/50 border-t border-slate-200 p-6">
+                                        <div class="text-center py-8 bg-white/50 border-2 border-dashed border-blue-200 rounded-2xl">
+                                            <span class="text-4xl block mb-2 opacity-60">🔄</span>
+                                            <p class="text-sm text-slate-500 font-bold">Ulasan akan muncul setelah laporan selesai diproses.</p>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     @empty
                         <div class="text-center py-20 glass-panel rounded-[3rem] border border-slate-200 shadow-sm animate-slide-up">
                             <span class="text-6xl block mb-4 animate-bounce">📭</span>
-                            <h3 class="text-xl font-extrabold text-slate-800 mb-1">Belum Ada Kinerja Terselesaikan</h3>
-                            <p class="text-slate-500 font-medium text-sm">Laporan yang sudah selesai diperbaiki akan muncul di sini.</p>
+                            <h3 class="text-xl font-extrabold text-slate-800 mb-1">Belum Ada Laporan yang Cocok</h3>
+                            <p class="text-slate-500 font-medium text-sm">Coba ubah filter status atau tanggal untuk melihat feed kinerja lainnya.</p>
                         </div>
                     @endforelse
+
+                    @if($laporanKinerja->hasPages())
+                        <div class="pt-4 flex justify-center">
+                            {{ $laporanKinerja->links() }}
+                        </div>
+                    @endif
                 </div>
 
                 <div x-show="activeTab === 'laporanku'" 
@@ -340,14 +428,14 @@
             </div>
         </div>
 
-        <div x-cloak x-show="openModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+        <div x-cloak x-show="openModal" class="fixed inset-0 z-[100] flex items-start sm:items-center justify-center p-4 sm:p-6 overflow-y-auto">
             <div x-show="openModal" x-transition.opacity.duration.300ms class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="openModal = false"></div>
             
             <div x-show="openModal" 
                  x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-8 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-8 scale-95"
-                 class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg relative z-10 overflow-hidden border border-slate-100">
+                 class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg relative z-10 overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
                 
-                <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
                     <div>
                         <h3 class="text-2xl font-black text-slate-900 tracking-tight">Buat Laporan Baru</h3>
                         <p class="text-sm text-slate-500 font-medium mt-1">Laporkan kerusakan sarpras dengan detail.</p>
@@ -357,37 +445,117 @@
                     </button>
                 </div>
 
-                <div class="p-8">
-                    <form action="{{ route('murid.pengaduan.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
-                        @csrf
-                        <div>
-                            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Kategori Kerusakan</label>
-                            <select name="kategori_id" required class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-slate-700 transition-shadow">
-                                <option value="" disabled selected>-- Pilih Kategori --</option>
-                                @foreach($kategoris as $kategori) 
-                                    <option value="{{ $kategori->id }}">{{ $kategori->nama_kategori }}</option> 
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Lokasi Detail</label>
-                            <input type="text" name="lokasi" required placeholder="Contoh: Lab Komputer 2, Meja No. 5" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow placeholder:text-slate-400 font-medium">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Keterangan / Deskripsi</label>
-                            <textarea name="keterangan" required rows="3" placeholder="Jelaskan kerusakannya..." class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow placeholder:text-slate-400 font-medium"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Bukti Foto (Opsional)</label>
-                            <input type="file" name="foto" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors border border-slate-200 rounded-xl bg-slate-50 cursor-pointer">
-                        </div>
-                        <div class="pt-2">
-                            <button type="submit" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-extrabold shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                                Kirim Laporan
-                            </button>
-                        </div>
-                    </form>
+                <div class="p-8 overflow-y-auto custom-scrollbar">
+                    <div x-data="{ 
+    num1: Math.floor(Math.random() * 10) + 1, 
+    num2: Math.floor(Math.random() * 10) + 1, 
+    captchaInput: '', 
+    captchaError: false,
+    showConfirmModal: false,
+    
+    checkCaptcha() {
+        // Jika jawaban salah
+        if (parseInt(this.captchaInput) !== (this.num1 + this.num2)) {
+            this.captchaError = true;
+            this.num1 = Math.floor(Math.random() * 10) + 1; // Reset soal
+            this.num2 = Math.floor(Math.random() * 10) + 1;
+            this.captchaInput = ''; // Kosongkan input
+            return false;
+        }
+        this.captchaError = false;
+        return true;
+    },
+
+    attemptSubmit() {
+        // Jika Captcha benar, munculkan Modal Konfirmasi
+        if (this.checkCaptcha()) {
+            this.showConfirmModal = true;
+        }
+    },
+
+    submitForm() {
+        // Eksekusi pengiriman formulir sebenarnya
+        document.getElementById('formPengaduan').submit();
+    }
+}">
+
+    <form id="formPengaduan" action="{{ route('murid.pengaduan.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" @submit.prevent="attemptSubmit">
+        @csrf
+
+        <div>
+            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Kategori Kerusakan <span class="text-red-500">*</span></label>
+            <select name="kategori_id" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-medium" required>
+                <option value="" disabled selected>-- Pilih Kategori --</option>
+                @foreach($kategoris as $kategori)
+                    <option value="{{ $kategori->id }}">{{ $kategori->nama_kategori }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Lokasi Lengkap <span class="text-red-500">*</span></label>
+            <input type="text" name="lokasi" placeholder="Contoh: Lab Komputer 2, Meja No 5" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-medium transition-shadow" required>
+        </div>
+
+        <div>
+            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Detail Kerusakan <span class="text-red-500">*</span></label>
+            <textarea name="keterangan" rows="4" placeholder="Jelaskan secara detail kerusakan yang terjadi..." class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-medium transition-shadow resize-none" required></textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm font-extrabold text-slate-700 mb-1.5">Bukti Foto <span class="text-slate-400 font-normal">(Opsional)</span></label>
+            <input type="file" name="foto" accept="image/*" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 focus:outline-none transition-all">
+            <p class="text-xs text-slate-500 mt-2 font-medium">* Format JPG/PNG, maksimal 2MB.</p>
+        </div>
+
+        <div class="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
+            <label class="block text-sm font-extrabold text-slate-800 mb-2">Verifikasi Keamanan <span class="text-red-500">*</span></label>
+            <p class="text-xs text-slate-500 mb-3 font-medium">Berapakah hasil penjumlahan dari angka berikut?</p>
+            
+            <div class="flex items-center gap-4">
+                <div class="bg-white px-6 py-3.5 rounded-xl font-extrabold text-blue-700 border-2 border-blue-200 text-xl tracking-wider select-none shadow-sm flex items-center justify-center min-w-[120px]" x-text="num1 + ' + ' + num2 + ' = ?'"></div>
+                
+                <input type="number" x-model="captchaInput" placeholder="Jawaban Anda" class="flex-1 px-5 py-3.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-bold transition-shadow text-lg" required>
+            </div>
+            
+            <p x-show="captchaError" class="text-red-500 text-sm mt-3 font-bold flex items-center gap-1.5" x-cloak>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Jawaban salah! Silakan hitung ulang.
+            </p>
+        </div>
+
+        <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-extrabold shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-lg">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+    Kirim Laporan
+</button>
+    </form>
+
+    <div x-show="showConfirmModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
+        <div x-show="showConfirmModal" x-transition.opacity class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+        
+        <div x-show="showConfirmModal" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+             class="relative bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full border border-slate-100 text-center">
+            
+            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+
+            <h3 class="text-2xl font-extrabold text-slate-800 mb-2">Kirim Laporan Sekarang?</h3>
+            <p class="text-slate-500 font-medium mb-8 leading-relaxed">Pastikan lokasi, kategori, dan keterangan yang Anda isi sudah benar. Laporan yang sudah dikirim tidak dapat diubah.</p>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button type="button" @click="showConfirmModal = false" class="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors">Periksa Kembali</button>
+                <button type="button" @click="submitForm()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-extrabold shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5">Ya, Kirim Laporan</button>
+            </div>
+        </div>
+    </div>
+</div>
                 </div>
             </div>
         </div>

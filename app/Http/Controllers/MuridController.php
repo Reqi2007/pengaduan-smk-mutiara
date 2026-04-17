@@ -10,18 +10,42 @@ use Illuminate\Support\Facades\Auth;
 
 class MuridController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pengaduans = Pengaduan::where('user_id', Auth::id())->latest()->get();
-        $kategoris = Kategori::all();
-        
-        // Mengambil laporan selesai beserta ulasan dari tabel baru
-        $laporanSelesai = Pengaduan::with(['user', 'kategori', 'ulasans.user'])
-                            ->where('status', 'Selesai')
-                            ->latest()
-                            ->get();
+        $filters = $request->validate([
+            'kinerja_status'  => ['nullable', 'in:semua,Proses,Selesai'],
+            'kinerja_sort'    => ['nullable', 'in:terbaru,terlama'],
+            'kinerja_tanggal' => ['nullable', 'date'],
+        ]);
 
-        return view('murid.dashboard', compact('pengaduans', 'kategoris', 'laporanSelesai'));
+        $pengaduans = Pengaduan::with('kategori')
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->get();
+        $kategoris = Kategori::all();
+
+        $kinerjaStatus = $filters['kinerja_status'] ?? 'semua';
+        $kinerjaSort = $filters['kinerja_sort'] ?? 'terbaru';
+        $kinerjaTanggal = $filters['kinerja_tanggal'] ?? null;
+
+        $laporanKinerjaQuery = Pengaduan::with(['user', 'kategori', 'ulasans.user'])
+            ->whereIn('status', ['Proses', 'Selesai']);
+
+        if ($kinerjaStatus !== 'semua') {
+            $laporanKinerjaQuery->where('status', $kinerjaStatus);
+        }
+
+        if ($kinerjaTanggal) {
+            $laporanKinerjaQuery->whereDate('created_at', $kinerjaTanggal);
+        }
+
+        $laporanKinerjaQuery->orderBy('created_at', $kinerjaSort === 'terlama' ? 'asc' : 'desc');
+
+        $laporanKinerja = $laporanKinerjaQuery
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('murid.dashboard', compact('pengaduans', 'kategoris', 'laporanKinerja'));
     }
 
     public function store(Request $request)
@@ -48,6 +72,12 @@ class MuridController extends Controller
     public function storeUlasan(Request $request, $pengaduan_id)
     {
         $request->validate(['rating' => 'required|integer|min:1|max:5', 'komentar' => 'required|string']);
+
+        $pengaduan = Pengaduan::findOrFail($pengaduan_id);
+
+        if ($pengaduan->status !== 'Selesai') {
+            return redirect()->back()->with('error', 'Ulasan hanya bisa diberikan setelah laporan selesai diproses.');
+        }
         
         // Cek jika sudah pernah review
         if(Ulasan::where('pengaduan_id', $pengaduan_id)->where('user_id', Auth::id())->exists()){
