@@ -142,10 +142,16 @@ Untuk memudahkan proses pengujian *role* (hak akses), Anda dapat masuk (*login*)
 * **Login dulu ke akun SuperAdmin setelah itu cari akun dummy Guru yang ingin di login atau buat baru**
 * **Password:** `password123`
 
+* **Di hosting, nama akun: reqim**
+* **Password:** `12345678`
+
 **3. Akun Murid**
 
 * **Login dulu ke akun SuperAdmin setelah itu cari akun dummy siswa yang ingin di login atau buat baru**
 * **Password:** `password123`
+
+* **Di hosting, nama akun: reqig**
+* **Password:** `12345678`
 
 *(Semua password *default* untuk akun dummy adalah `password123`)*
 
