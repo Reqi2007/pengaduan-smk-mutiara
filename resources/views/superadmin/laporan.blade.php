@@ -244,7 +244,7 @@
                     <h3>PEMERINTAH DAERAH PROVINSI JAWA BARAT</h3>
                     <h1>SMK MUTIARA BANDUNG</h1>
                     <p>Jl. Maleber Utara No 37, Kota Bandung, Jawa Barat 40181</p>
-                    <p>Email: reqi2007@gmail.com | Telp: (022) 1234567</p>
+                    <p>Email: reqi2007@gmail.com | Telp: +62 821-1909-6623</p>
                 </td>
             </tr>
         </table>
