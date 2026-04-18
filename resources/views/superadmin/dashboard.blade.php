@@ -34,6 +34,12 @@
             openModal: false,
             editModal: false,
             activeTab: '{{ $view }}',
+            initialTab: '{{ $view }}',
+            watchActiveTab() {
+                this.$watch('activeTab', () => {
+                    document.getElementById('filterForm').submit();
+                });
+            },
             roleMode: 'murid',
             studentClass: '',
             studentJurusan: '',
@@ -60,7 +66,8 @@
                 const max = role === 'murid' ? 8 : 10;
                 event.target.value = event.target.value.replace(/[^0-9]/g, '').slice(0, max);
             }
-         }">
+         }"
+         x-init="watchActiveTab()">
         
         <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
             <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-slate-300/30 rounded-full blur-[120px] animate-float"></div>
@@ -256,7 +263,7 @@
                                     </button>
                                 </div>
 
-                                <form method="GET" action="{{ route('superadmin.dashboard') }}" class="flex flex-col lg:flex-row gap-3 w-full lg:w-auto">
+                                <form id="filterForm" method="GET" action="{{ route('superadmin.dashboard') }}" class="flex flex-col lg:flex-row gap-3 w-full lg:w-auto">
                                     <input type="hidden" name="view" :value="activeTab">
                                     <div>
                                         <label class="block text-xs font-extrabold text-slate-600 mb-2 uppercase tracking-wider">Urutkan</label>
@@ -292,12 +299,6 @@
                                                 <option value="{{ $jurusanOption }}" {{ $jurusan === $jurusanOption ? 'selected' : '' }}>{{ $jurusanOption }}</option>
                                             @endforeach
                                         </select>
-                                    </div>
-
-                                    <div class="flex items-end">
-                                        <button type="submit" class="w-full lg:w-auto px-4 py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-extrabold shadow-sm transition">
-                                            Terapkan
-                                        </button>
                                     </div>
                                 </form>
                             </div>
