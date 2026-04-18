@@ -147,9 +147,10 @@
                                 @forelse($resetRequests as $request)
                                 <tr class="hover:bg-amber-50/40 transition-colors group">
                                     <td class="px-6 py-4">
+                                        @php($requestUserPhoto = $request->user->profile_photo_url)
                                         <div class="flex items-center gap-3">
-                                            @if($request->user->avatar)
-                                                <img src="{{ asset('storage/' . $request->user->avatar) }}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-slate-200">
+                                            @if($requestUserPhoto)
+                                                <img src="{{ $requestUserPhoto }}" alt="Foto profil {{ $request->user->name }}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-slate-200">
                                             @else
                                                 <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-black shrink-0">
                                                     {{ substr($request->user->name, 0, 1) }}
@@ -327,10 +328,15 @@
                                     @forelse($users as $user)
                                         <tr class="hover:bg-slate-50 transition-colors group">
                                             <td class="px-6 py-4">
+                                                @php($profilePhotoUrl = $user->profile_photo_url)
                                                 <div class="flex items-center gap-3">
-                                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br {{ $user->role === 'murid' ? 'from-blue-100 to-blue-200 text-blue-700 border-blue-300/50' : 'from-emerald-100 to-emerald-200 text-emerald-700 border-emerald-300/50' }} flex items-center justify-center font-black shadow-inner border shrink-0">
-                                                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                                                    </div>
+                                                    @if($profilePhotoUrl)
+                                                        <img src="{{ $profilePhotoUrl }}" alt="Foto profil {{ $user->name }}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-slate-200 shrink-0">
+                                                    @else
+                                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br {{ $user->role === 'murid' ? 'from-blue-100 to-blue-200 text-blue-700 border-blue-300/50' : 'from-emerald-100 to-emerald-200 text-emerald-700 border-emerald-300/50' }} flex items-center justify-center font-black shadow-inner border shrink-0">
+                                                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                        </div>
+                                                    @endif
                                                     <div>
                                                         <p class="text-sm font-bold text-slate-800">{{ $user->name }}</p>
                                                         <p class="text-[11px] font-medium text-slate-500">{{ $user->email }}</p>
@@ -420,10 +426,15 @@
                                     @forelse($users->where('role', 'murid') as $user)
                                     <tr class="hover:bg-blue-50/30 transition-colors group">
                                         <td class="px-6 py-4">
+                                            @php($profilePhotoUrl = $user->profile_photo_url)
                                             <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 flex items-center justify-center font-black shadow-inner border border-blue-300/50 shrink-0">
-                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                                                </div>
+                                                @if($profilePhotoUrl)
+                                                    <img src="{{ $profilePhotoUrl }}" alt="Foto profil {{ $user->name }}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-blue-200 shrink-0">
+                                                @else
+                                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 flex items-center justify-center font-black shadow-inner border border-blue-300/50 shrink-0">
+                                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                    </div>
+                                                @endif
                                                 <div>
                                                     <p class="text-sm font-bold text-slate-800">{{ $user->name }}</p>
                                                     <p class="text-[11px] font-medium text-slate-500">{{ $user->email }}</p>
@@ -503,10 +514,15 @@
                                     @forelse($users->where('role', 'guru') as $user)
                                     <tr class="hover:bg-emerald-50/30 transition-colors group">
                                         <td class="px-6 py-4">
+                                            @php($profilePhotoUrl = $user->profile_photo_url)
                                             <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-700 flex items-center justify-center font-black shadow-inner border border-emerald-300/50 shrink-0">
-                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                                                </div>
+                                                @if($profilePhotoUrl)
+                                                    <img src="{{ $profilePhotoUrl }}" alt="Foto profil {{ $user->name }}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-emerald-200 shrink-0">
+                                                @else
+                                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-700 flex items-center justify-center font-black shadow-inner border border-emerald-300/50 shrink-0">
+                                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                    </div>
+                                                @endif
                                                 <div>
                                                     <p class="text-sm font-bold text-slate-800">{{ $user->name }}</p>
                                                     <p class="text-[11px] font-medium text-slate-500">{{ $user->email }}</p>

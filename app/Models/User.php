@@ -6,6 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -57,5 +59,25 @@ class User extends Authenticatable
     public function pengaduans()
     {
         return $this->hasMany(Pengaduan::class);
+    }
+
+    public function getProfilePhotoPathAttribute(): ?string
+    {
+        return $this->avatar ?: $this->foto_profile;
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        $path = $this->profile_photo_path;
+
+        if (! $path) {
+            return null;
+        }
+
+        if (Str::startsWith($path, ['http://', 'https://'])) {
+            return $path;
+        }
+
+        return Storage::url($path);
     }
 }
