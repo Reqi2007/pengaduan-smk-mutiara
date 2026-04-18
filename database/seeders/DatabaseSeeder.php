@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
                 ['email' => "guru{$i}@smk-mutiara.sch.id"],
                 [
                     // Mengenerate nama acak ditambah gelar S.Pd
-                    'name' => $faker->firstName . ' ' . $faker->lastName . ', S.Pd.',
+                    'name' => 'Guru Dummy ' . str_pad((string) $i, 2, '0', STR_PAD_LEFT) . ' - ' . $faker->firstName . ' ' . $faker->lastName . ', S.Pd.',
                     'password' => $defaultPassword,
                     'role' => 'guru',
                     'is_active' => true,
@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
                 ['email' => "siswa{$i}@smk-mutiara.sch.id"],
                 [
                     // Mengenerate nama murid acak
-                    'name' => $faker->name,
+                    'name' => 'Murid Dummy ' . str_pad((string) $i, 3, '0', STR_PAD_LEFT) . ' - ' . $faker->name,
                     'password' => $defaultPassword,
                     'role' => 'murid',
                     'is_active' => true,
@@ -90,5 +90,7 @@ class DatabaseSeeder extends Seeder
                 ['deskripsi' => $category['deskripsi']]
             );
         }
+
+        $this->call(PengaduanDummySeeder::class);
     }
 }
